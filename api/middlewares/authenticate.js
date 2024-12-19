@@ -1,0 +1,1 @@
+// here you should implement authentication middleware for protected routes (endpoints)
