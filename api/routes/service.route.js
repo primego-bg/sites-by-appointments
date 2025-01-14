@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { HTTP_STATUS_CODES, DATABASE_MODELS, COLLECTIONS } = require('../global');
+const { HTTP_STATUS_CODES, COLLECTIONS } = require('../global');
 
 const DbService = require('../services/db.service');
 const adminAuthenticate = require('../middlewares/adminAuthenticate');
@@ -25,6 +25,21 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
         return res.sendStatus(HTTP_STATUS_CODES.CREATED);
     } catch(err) {
         return next(new ResponseError(err.message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+    }
+});
+
+router.get('/:id', async (req, res, next) => {
+    if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
+        return next(new ResponseError('errors.invalid_id', HTTP_STATUS_CODES.BAD_REQUEST));
+
+    try {
+        const serviceId = new mongoose.Types.ObjectId(req.params.id);
+        const service = await DbService.getById(COLLECTIONS.SERVICES, serviceId);
+        if (!service || service.status === 'deleted') return next(new ResponseError('errors.not_found', HTTP_STATUS_CODES.NOT_FOUND));
+
+        return res.status(HTTP_STATUS_CODES.OK).send(service);
+    } catch(err) {
+        return next(new ResponseError('errors.internal_server_error', HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
 
