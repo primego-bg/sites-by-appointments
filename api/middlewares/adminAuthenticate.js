@@ -6,3 +6,5 @@ const adminAuthenticate = (req, res, next) => {
     }
     next();
 }
+
+module.exports = adminAuthenticate;
