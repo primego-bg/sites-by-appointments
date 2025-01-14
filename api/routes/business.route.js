@@ -14,25 +14,17 @@ const { adminAuthenticate } = require('../services/authentication.service');
 const { Business } = require('../db//models/business.model');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
+    const { error } = businessPostValidation(req.body);
+    if (error) {
+        return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
+    }
     try
     {
-        const { error } = businessPostValidation(req.body);
-        if (error) 
-        {
-            return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
-        }
 
-        const existingBusiness = await DbService.getOne(Business.collection.name, { name: req.body.name });
-        if (existingBusiness) {
-            return res.status(HTTP_STATUS_CODES.CONFLICT).send('Business already exists');
-        }
-
-        const newBusiness = await DbService.create(Business.collection.name, req.body);
+        const newBusiness = new Business(req.body);
         await DbService.create(COLLECTIONS.BUSINESSES, newBusiness);
 
-        return res.status(HTTP_STATUS_CODES.CREATED).send({
-            newBusiness: newBusiness
-        });
+        return res.sendStatus(HTTP_STATUS_CODES.CREATED);
     }
     catch (error)
     {
@@ -40,22 +32,26 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
     }
 });
 
-router.get('/id', async (req, res, next) => {
-    
+router.get('/:id', async (req, res, next) => { 
+    if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
+    {
+        return next(new ResponseError('errors.invalid_id', HTTP_STATUS_CODES.BAD_REQUEST));
+    }
     try
     {
-        if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
-        {
-            return next(new ResponseError('errors.invalid_id', HTTP_STATUS_CODES.BAD_REQUEST));
-        }
 
         const businessId = new mongoose.Types.ObjectId(req.params.id);
         const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
 
         if (!business || business.status === 'deleted') 
         {
-            return next(new ResponseError('errors.internal_server_error', HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+            return next(new ResponseError('errors.not_found', HTTP_STATUS_CODES.NOT_FOUND));
         }
+        if(business.status !== 'active') {
+            return next(new ResponseError('errors.inactive', HTTP_STATUS_CODES.CONFLICT));
+        }
+
+        //TODO: shall get all business info relevant to the frontend
 
         return res.status(HTTP_STATUS_CODES.OK).send({
             business: business
@@ -63,39 +59,40 @@ router.get('/id', async (req, res, next) => {
     }
     catch (error)
     {
-        return next(new ResponseError(error.message || DEFAULT_ERROR_MESSAGE. error.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+        return next(new ResponseError('errors.internal_server_error', error.status || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
 
 router.put('/:id', adminAuthenticate, async (req, res, next) => {
-    
+    if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
+    {
+        return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
+    }
+
+    const { error } = businessPutValidation(req.body);
+    if (error) 
+    {
+        return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
+    }
+
     try
     {
-        if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
-        {
-            return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
-        }
         
-        const { error } = businessPutValidation(req.body);
-        if (error) 
-        {
-            return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
-        }
 
         const businessId = new mongoose.Types.ObjectId(req.params.id);
         const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
 
         if (!business || business.status === 'deleted') 
         {
-            return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+            return next(new ResponseError('Business not found', HTTP_STATUS_CODES.NOT_FOUND));
+        }
+        if(business.status !== 'active') {
+            return next(new ResponseError('Business is not active', HTTP_STATUS_CODES.CONFLICT));
         }
 
         await DbService.update(COLLECTIONS.BUSINESSES, { _id: businessId }, req.body);
-        const updatedBusiness = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
 
-        return res.status(HTTP_STATUS_CODES.OK).send({
-            updatedBusiness: updatedBusiness
-        });
+        return res.sendStatus(HTTP_STATUS_CODES.OK);
     }
     catch (error)
     {

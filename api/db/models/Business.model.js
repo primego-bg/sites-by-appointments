@@ -83,7 +83,7 @@ const businessSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    // milliseconds
+    // minutes
     slotTime: {
         type: Number,
         required: true,

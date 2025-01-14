@@ -9,6 +9,12 @@ const calendarSchema = mongoose.Schema({
         ref: DATABASE_MODELS.BUSINESS,
         required: true,
     },
+    teamupCalendarId: {
+        type: String,
+        required: function () {
+            return this.integration === INTEGRATIONS.TEAMUP;
+        }
+    },
     integration: {
         type: String,
         enum: Object.values(INTEGRATIONS),

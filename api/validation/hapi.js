@@ -163,19 +163,23 @@ const specialHoursSchema = Joi.object({
 
 const businessPostValidation = (data) => {
     const schema = Joi.object({
-        name: Joi.string().required(),
-        description: Joi.string().optional(),
-        logo: Joi.string().optional(),
-        phone: Joi.string().optional(),
-        email: Joi.string().optional(),
-        website: Joi.string().optional(),
-        socialMedia: Joi.object().optional(),
+        name: Joi.string().min(3).max(100).required(),
+        description: Joi.string().max(500).optional(),
+        logo: Joi.string().uri().optional(),
+        phone: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
+        email: Joi.string().email().optional(),
+        website: Joi.string().uri().optional(),
+        socialMedia: Joi.object({
+            facebook: Joi.string().uri().optional(),
+            twitter: Joi.string().uri().optional(),
+            instagram: Joi.string().uri().optional(),
+            linkedin: Joi.string().uri().optional()
+        }).optional(),
         workingHours: Joi.array().items(workingHoursSchema).optional(),
         specialHours: Joi.array().items(specialHoursSchema).optional(),
-        URLpostfix: Joi.string().required(),
-        slotTime: Joi.number().required(),
-        maximumDaysInFuture: Joi.number().required(),
-        minimumTimeSlotsInFuture: Joi.number().required(),
+        slotTime: Joi.number().min(1).max(1440).required(),
+        maximumDaysInFuture: Joi.number().min(1).max(60).required(),
+        minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).required(),
         status: Joi.string().valid('active', 'inactive', 'deleted').required(),
     });
 
@@ -184,19 +188,16 @@ const businessPostValidation = (data) => {
 
 const businessPutValidation = (data) => {
     const schema = Joi.object({
-        name: Joi.string().optional(),
-        description: Joi.string().optional(),
-        logo: Joi.string().optional(),
-        phone: Joi.string().optional(),
-        email: Joi.string().optional(),
-        website: Joi.string().optional(),
-        socialMedia: Joi.object().optional(),
+        description: Joi.string().max(500).optional(),
+        logo: Joi.string().uri().optional(),
+        phone: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
+        email: Joi.string().email().optional(),
+        website: Joi.string().uri().optional(),
         workingHours: Joi.array().items(workingHoursSchema).optional(),
         specialHours: Joi.array().items(specialHoursSchema).optional(),
-        URLpostfix: Joi.string().optional(),
-        slotTime: Joi.number().optional(),
-        maximumDaysInFuture: Joi.number().optional(),
-        minimumTimeSlotsInFuture: Joi.number().optional(),
+        slotTime: Joi.number().min(1).max(1440).optional(),
+        maximumDaysInFuture: Joi.number().min(1).max(60).optional(),
+        minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).optional(),
         status: Joi.string().valid('active', 'inactive', 'deleted').optional(),
     });
 
@@ -221,9 +222,13 @@ const teamupApiKeyValidation = Joi.string().when('integration', {
 const calendarPostValidation = (data) => {
     const schema = Joi.object({
         businessId: objectIdValidation.required(),
-        integration: Joi.string().valid(...Object.values(INTEGRATIONS)).optional(),
+        integration: Joi.string().valid(...Object.values(INTEGRATIONS)).required(),
+        teamupCalendarId: Joi.string().when('integration', {
+            is: INTEGRATIONS.TEAMUP,
+            then: Joi.required(),
+            otherwise: Joi.optional()
+        }),
         teamupApiKey: teamupApiKeyValidation,
-        timezone: timezoneValidation.required(),
         lastSynchronized: Joi.date().optional().allow(null),
         status: Joi.string().valid('active', 'deleted').required()
     });
@@ -233,11 +238,6 @@ const calendarPostValidation = (data) => {
 
 const calendarPutValidation = (data) => {
     const schema = Joi.object({
-        businessId: objectIdValidation.optional(),
-        integration: Joi.string().valid(...Object.values(INTEGRATIONS)).optional(),
-        teamupApiKey: teamupApiKeyValidation,
-        timezone: timezoneValidation.optional(),
-        lastSynchronized: Joi.date().optional().allow(null),
         status: Joi.string().valid('active', 'deleted').optional()
     });
 

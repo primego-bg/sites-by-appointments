@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { HTTP_STATUS_CODES, COLLECTIONS } = require('../global');
+const { HTTP_STATUS_CODES, COLLECTIONS, DEFAULT_ERROR_MESSAGE } = require('../global');
 
 const DbService = require('../services/db.service');
 const adminAuthenticate = require('../middlewares/adminAuthenticate');
@@ -24,7 +24,7 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
         
         return res.sendStatus(HTTP_STATUS_CODES.CREATED);
     } catch(err) {
-        return next(new ResponseError(err.message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+        return next(new ResponseError(err.message || DEFAULT_ERROR_MESSAGE, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
 
@@ -70,6 +70,8 @@ router.put('/:id', adminAuthenticate, async (req, res, next) => {
 
         return res.sendStatus(HTTP_STATUS_CODES.OK);
     } catch(err) {
-        return next(new ResponseError(err.message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+        return next(new ResponseError(err.message || DEFAULT_ERROR_MESSAGE, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
+
+module.exports = router;
