@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const { DATABASE_MODELS } = require("../../global");
 const INTEGRATIONS = require("../../enums/integrations.enum");
-const { type } = require("jquery");
 const moment = require("moment-timezone");
 
 const calendarSchema = mongoose.Schema({
@@ -44,7 +43,17 @@ const calendarSchema = mongoose.Schema({
             type: String,
             required: true
         }
-    }]
+    }],
+    lastSynchronized: {
+        type: Date,
+        required: false,
+        default: null
+    },
+    maximumDaysInFuture: {
+        type: Number,
+        required: true,
+        default: 30
+    }
 });
 
 const Calendar = mongoose.model(DATABASE_MODELS.CALENDAR, calendarSchema);

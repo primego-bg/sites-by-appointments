@@ -29,6 +29,10 @@ const eventSchema = mongoose.Schema({
     teamupSubCalendarId: {
         type: String,
         required: false
+    },
+    originalObject: {
+        type: Object,
+        required: false,
     }
 });
 
