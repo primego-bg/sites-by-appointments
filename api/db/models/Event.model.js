@@ -4,6 +4,7 @@ const { DATABASE_MODELS } = require("../../global");
 const eventSchema = mongoose.Schema({
     calendarId: {
         type: mongoose.Types.ObjectId,
+        ref: DATABASE_MODELS.CALENDAR,
         required: true
     },
     title: {
@@ -22,18 +23,10 @@ const eventSchema = mongoose.Schema({
         type: Date,
         required: true
     },
-    teamupEventId: {
-        type: String,
-        required: false
-    },
-    teamupSubCalendarId: {
-        type: String,
-        required: false
-    },
     originalObject: {
         type: Object,
         required: false,
-    }
+    },
 });
 
 const Event = mongoose.model(DATABASE_MODELS.EVENT, eventSchema);

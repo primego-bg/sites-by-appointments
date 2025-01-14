@@ -1,11 +1,19 @@
 const DATABASE_MODELS = {
     CALENDAR: "Calendar",
-    EVENT: "Event"
+    EVENT: "Event",
+    EMPLOYEE: "Employee",
+    LOCATION: "Location",
+    SERVICE: "Service",
+    BUSINESS: "Business",
 }
 
 const COLLECTIONS = {
     CALENDARS: "calendars",
-    EVENTS: "events"
+    EVENTS: "events",
+    EMPLOYEES: "employees",
+    LOCATIONS: "locations",
+    SERVICES: "services",
+    BUSINESSES: "businesses",
 }
 
 const HTTP_STATUS_CODES = {

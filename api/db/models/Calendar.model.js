@@ -4,8 +4,9 @@ const INTEGRATIONS = require("../../enums/integrations.enum");
 const moment = require("moment-timezone");
 
 const calendarSchema = mongoose.Schema({
-    projectId: {
-        type: String,
+    businessId: {
+        type: mongoose.Types.ObjectId,
+        ref: DATABASE_MODELS.BUSINESS,
         required: true,
     },
     integration: {
@@ -30,29 +31,15 @@ const calendarSchema = mongoose.Schema({
             message: "Invalid timezone"
         }
     },
-    subCalendars: [{
-        name: {
-            type: String,
-            required: true
-        },
-        color: {
-            type: String,
-            required: true
-        },
-        id: {
-            type: String,
-            required: true
-        }
-    }],
     lastSynchronized: {
         type: Date,
         required: false,
         default: null
     },
-    maximumDaysInFuture: {
-        type: Number,
-        required: true,
-        default: 30
+    status: {
+        type: String,
+        enum: ["active", "deleted"],
+        required: true
     }
 });
 
