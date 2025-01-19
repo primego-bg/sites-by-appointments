@@ -7,6 +7,10 @@ const eventSchema = mongoose.Schema({
         ref: DATABASE_MODELS.CALENDAR,
         required: true
     },
+    teamupSubCalendarId: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: true

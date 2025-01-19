@@ -27,6 +27,12 @@ const calendarSchema = mongoose.Schema({
             return this.integration === INTEGRATIONS.TEAMUP;
         }
     },
+    teamupSecretCalendarKey: {
+        type: String,
+        required: function () {
+            return this.integration === INTEGRATIONS.TEAMUP;
+        }
+    },
     timezone: {
         type: String,
         required: true,
