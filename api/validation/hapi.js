@@ -129,26 +129,8 @@ const workingHoursSchema = Joi.object({
     day: Joi.string()
         .valid('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
         .required(),
-    open: timeValidation.when('isClosed', { is: false, then: Joi.required() }),
-    close: timeValidation.when('isClosed', { is: false, then: Joi.required() }),
-    isClosed: Joi.boolean().default(false),
-}).custom((value, helpers) => {
-    if (!value.isClosed) {
-        const [openHour, openMinute] = value.open.split(':').map(Number);
-        const [closeHour, closeMinute] = value.close.split(':').map(Number);
-
-        if (openHour > closeHour || (openHour === closeHour && openMinute >= closeMinute)) {
-            return helpers.error('any.invalid', { message: 'Close time must be later than open time.' });
-        }
-    }
-    return value;
-}, 'Open and Close Time Validation');
-
-const specialHoursSchema = Joi.object({
-    date: Joi.date().required(),
-    open: timeValidation.when('isClosed', { is: false, then: Joi.required() }),
-    close: timeValidation.when('isClosed', { is: false, then: Joi.required() }),
-    isClosed: Joi.boolean().default(false),
+    open: timeValidation.required(),
+    close: timeValidation.required(),
 }).custom((value, helpers) => {
     if (!value.isClosed) {
         const [openHour, openMinute] = value.open.split(':').map(Number);
@@ -166,17 +148,17 @@ const businessPostValidation = (data) => {
         name: Joi.string().min(3).max(100).required(),
         description: Joi.string().max(500).optional(),
         logo: Joi.string().uri().optional(),
-        phone: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
+        phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional(),
         email: Joi.string().email().optional(),
         website: Joi.string().uri().optional(),
         socialMedia: Joi.object({
             facebook: Joi.string().uri().optional(),
             twitter: Joi.string().uri().optional(),
             instagram: Joi.string().uri().optional(),
-            linkedin: Joi.string().uri().optional()
+            linkedin: Joi.string().uri().optional(),
+            tiktok: Joi.string().uri().optional(),
         }).optional(),
-        workingHours: Joi.array().items(workingHoursSchema).optional(),
-        specialHours: Joi.array().items(specialHoursSchema).optional(),
+        workingHours: Joi.array().items(workingHoursSchema).required(),
         slotTime: Joi.number().min(1).max(1440).required(),
         maximumDaysInFuture: Joi.number().min(1).max(60).required(),
         minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).required(),
@@ -194,7 +176,6 @@ const businessPutValidation = (data) => {
         email: Joi.string().email().optional(),
         website: Joi.string().uri().optional(),
         workingHours: Joi.array().items(workingHoursSchema).optional(),
-        specialHours: Joi.array().items(specialHoursSchema).optional(),
         slotTime: Joi.number().min(1).max(1440).optional(),
         maximumDaysInFuture: Joi.number().min(1).max(60).optional(),
         minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).optional(),
@@ -255,5 +236,5 @@ module.exports = {
     businessPostValidation,
     businessPutValidation,
     calendarPostValidation,
-    calendarPutValidation
+    calendarPutValidation,
 }

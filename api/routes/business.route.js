@@ -10,8 +10,8 @@ const { businessPutValidation } = require('../validation/hapi');
 const ResponseError = require('../errors/responseError');
 
 const { DEFAULT_ERROR_MESSAGE, HTTP_STATUS_CODES, COLLECTIONS } = require('../global');
-const { adminAuthenticate } = require('../services/authentication.service');
-const { Business } = require('../db//models/business.model');
+const { Business } = require('../db//models/Business.model');
+const adminAuthenticate = require('../middlewares/adminAuthenticate');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
     const { error } = businessPostValidation(req.body);
@@ -20,6 +20,8 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
     }
     try
     {
+        const existingBusiness = await DbService.getOne(COLLECTIONS.BUSINESSES, { website: req.body.website });
+        if(existingBusiness) return next(new ResponseError('Business already exists', HTTP_STATUS_CODES.CONFLICT));
 
         const newBusiness = new Business(req.body);
         await DbService.create(COLLECTIONS.BUSINESSES, newBusiness);

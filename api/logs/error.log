@@ -1,0 +1,8 @@
+{"clientIp":"::1","dt":1737410340444,"level":"error","message":"\"name\" is required"}
+{"clientIp":"::1","dt":1737410353918,"level":"error","message":"\"name\" is required"}
+{"clientIp":"::1","dt":1737411304330,"level":"error","message":"\"phone\" with value \"+359 876 151 924\" fails to match the required pattern: /^[0-9]{10,15}$/"}
+{"clientIp":"::1","dt":1737411349966,"level":"error","message":"\"phone\" with value \"+359 876 151 924\" fails to match the required pattern: /^\\+?[1-9]\\d{1,14}$/"}
+{"clientIp":"::1","dt":1737411352844,"level":"error","message":"\"phone\" with value \"+359 876 151 924\" fails to match the required pattern: /^\\+?[1-9]\\d{1,14}$/"}
+{"clientIp":"::1","dt":1737411373298,"level":"error","message":"\"website\" must be a valid uri"}
+{"clientIp":"::1","dt":1737411494413,"level":"error","message":"Business already exists"}
+{"clientIp":"::1","dt":1737411630086,"level":"error","message":"Business already exists"}

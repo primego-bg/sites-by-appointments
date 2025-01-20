@@ -1,7 +1,7 @@
 const { HTTP_STATUS_CODES } = require("../global");
 
 const adminAuthenticate = (req, res, next) => {
-    if(!req.headers['ADMIN_TOKEN'] || !req.headers['ADMIN_TOKEN'] === process.env.ADMIN_TOKEN) {
+    if(!req.headers['admin_password'] || req.headers['admin_password'] !== process.env.ADMIN_PASSWORD) {
         return res.status(HTTP_STATUS_CODES.UNAUTHORIZED).send("Unauthorized");
     }
     next();

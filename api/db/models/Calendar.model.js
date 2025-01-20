@@ -8,6 +8,7 @@ const calendarSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: DATABASE_MODELS.BUSINESS,
         required: true,
+        unique: true,
     },
     teamupCalendarId: {
         type: String,

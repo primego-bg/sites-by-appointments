@@ -15,9 +15,71 @@ const TeamupService = {
             return null;
         }
     },
-    getEvents: async (teamupSecretCalendarKey, teamupApiKey, startDate=null, endDate=null) => {
+    getInitialEvents: async (teamupSecretCalendarKey, teamupApiKey, startDate, resultsSchema=null) => {
         try {
+            // example of results schema
+            // const resultsSchema = (event) => {
+            //     return {
+            //         id: event.id,
+            //         subcalendar_ids: event.subcalendar_ids,
+            //         start_dt: event.start_dt,
+            //         end_dt: event.end_dt,
+            //     };
+            // };
+
+            const endDate = `${new Date(startDate).getFullYear() + 1}-${new Date(startDate).getMonth() + 1}-${new Date(startDate).getDate()}`;            
             const response = await axios.get(`https://api.teamup.com/${teamupSecretCalendarKey}/events?startDate=${startDate}&endDate=${endDate}`, {
+                headers: {
+                    'Teamup-Token': teamupApiKey
+                }
+            });
+
+            if (!resultsSchema) {
+                return response.data.events;
+            }
+
+            return response.data.events.map((event) => resultsSchema(event));
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    },
+    createEvent: async (teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, startDt, endDt, resultsSchema=null) => {
+        try {
+            // example of results schema
+            // const resultsSchema = (event) => {
+            //     return {
+            //         id: event.id,
+            //         subcalendar_ids: event.subcalendar_ids,
+            //         start_dt: event.start_dt,
+            //         end_dt: event.end_dt,
+            //     };
+            // };
+
+            const response = await axios.post(`https://api.teamup.com/${teamupSecretCalendarKey}/events`, {
+                subcalendar_ids: subcalendarIds,
+                title,
+                start_dt: startDt,
+                end_dt: endDt,
+            }, {
+                headers: {
+                    'Teamup-Token': teamupApiKey
+                }
+            });
+
+            if (!resultsSchema) {
+                return response.data.event;
+            }
+
+            return resultsSchema(response.data.event);
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    },
+    syncModifiedEvents: async (teamupSecretCalendarKey, teamupApiKey, lastSynchronizedDt) => {
+        try {
+            const response = await axios.get(`https://api.teamup.com/${teamupSecretCalendarKey}/events?modifiedSince=${lastSynchronizedDt}`, {
                 headers: {
                     'Teamup-Token': teamupApiKey
                 }
@@ -29,42 +91,6 @@ const TeamupService = {
             return null;
         }
     },
-    createEvent: async (teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, startDt, endDt, inputFormat, notes) => {
-        try {
-            const response = await axios.post(`https://api.teamup.com/${teamupSecretCalendarKey}/events`, {
-                subcalendar_ids: subcalendarIds,
-                title,
-                start_dt: startDt,
-                end_dt: endDt,
-                input_format: inputFormat,
-                notes
-            }, {
-                headers: {
-                    'Teamup-Token': teamupApiKey
-                }
-            });
-
-            return response.data.event;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
-    },
-    syncEvents: async (subcalendarId, startDate, endDate) => {
-        try {
-            const response = await axios.get(`https://api.teamup.com/${subcalendarId}/events?startDate=${startDate}&endDate=${endDate}`, {
-                headers: {
-                    'Teamup-Token': process.env.TEAMUP_API_KEY
-                }
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
-    },
-
 };
 
 module.exports = TeamupService;

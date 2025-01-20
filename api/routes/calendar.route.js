@@ -10,8 +10,8 @@ const { calendarPutValidation } = require('../validation/hapi');
 const ResponseError = require('../errors/responseError');
 
 const { DEFAULT_ERROR_MESSAGE, HTTP_STATUS_CODES, COLLECTIONS } = require('../global');
-const { adminAuthenticate } = require('../services/authentication.service');
 const {Calendar} = require('../db/models/Calendar.model');
+const adminAuthenticate = require('../middlewares/adminAuthenticate');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
     const { error } = calendarPostValidation(req.body);
