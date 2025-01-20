@@ -6,3 +6,4 @@
 {"clientIp":"::1","dt":1737411373298,"level":"error","message":"\"website\" must be a valid uri"}
 {"clientIp":"::1","dt":1737411494413,"level":"error","message":"Business already exists"}
 {"clientIp":"::1","dt":1737411630086,"level":"error","message":"Business already exists"}
+{"clientIp":"::1","dt":1737411704145,"level":"error","message":"Business already exists"}
