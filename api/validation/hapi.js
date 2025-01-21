@@ -158,6 +158,7 @@ const businessPostValidation = (data) => {
             linkedin: Joi.string().uri().optional(),
             tiktok: Joi.string().uri().optional(),
         }).optional(),
+        URLpostfix: Joi.string().pattern(/^[a-zA-Z0-9-_]+$/).required(),
         workingHours: Joi.array().items(workingHoursSchema).required(),
         slotTime: Joi.number().min(1).max(1440).required(),
         maximumDaysInFuture: Joi.number().min(1).max(60).required(),
