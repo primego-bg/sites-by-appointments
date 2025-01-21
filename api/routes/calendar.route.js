@@ -33,6 +33,7 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
         if(!result) return next(new ResponseError('Teamup calendar configuration retrieval failed', HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
 
         const newCalendar = new Calendar(req.body);
+        newCalendar.timezone = result.date_time.tz;
         await DbService.create(COLLECTIONS.CALENDARS, newCalendar);
 
         const events = await TeamupService.getInitialEvents(req.body.teamupSecretCalendarKey, req.body.teamupApiKey, new Date().toISOString());
@@ -67,7 +68,6 @@ router.get('/:id', async (req, res, next) => {
     }
     try
     {
-
         const calendarId = new mongoose.Types.ObjectId(req.params.id);
         const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
 

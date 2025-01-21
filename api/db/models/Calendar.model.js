@@ -28,6 +28,11 @@ const calendarSchema = mongoose.Schema({
             return this.integration === INTEGRATIONS.TEAMUP;
         }
     },
+    timezone: {
+        type: String,
+        valid: moment.tz.names(),
+        required: true,
+    },
     lastSynchronized: {
         type: Date,
         required: false,

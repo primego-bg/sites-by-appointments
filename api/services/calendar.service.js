@@ -3,6 +3,7 @@ const { COLLECTIONS } = require('../global');
 const DbService = require('./db.service');
 const TeamupService = require('./teamup.service');
 const { Event } = require('../db/models/Event.model');
+const moment = require('moment-timezone');
 
 const CalendarService = {
     syncAllCalendars: async () => {
@@ -115,8 +116,10 @@ const CalendarService = {
             return null;
         }
     },
-    checkAvailability: async (calendarId, startDt, endDt) => {
+    checkAvailability: async (calendarId, startDt, endDt, subCalendarId=null) => {
         try {
+            // startDt and endDt are ISO strings
+
             const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
             if(!calendar) return null;
             // check availability based on event model records, business working hours, maximum days in future and minimum time slots
@@ -129,6 +132,7 @@ const CalendarService = {
             const businessMaximumDaysInFuture = business.maximumDaysInFuture;
             const businessMinimumTimeSlots = business.minimumTimeSlotsInFuture;
             const businessSlotTime = business.slotTime;
+            const momentTimezone = calendar.timezone;
 
             startDt = new Date(startDt);
             endDt = new Date(endDt);
@@ -144,27 +148,31 @@ const CalendarService = {
             let isEndDtWithinBusinessWorkingHours = false;
 
             for(let i = 0; i < businessWorkingHours.length; i++) {
+                const localizedStartDt = moment(startDt).tz(momentTimezone);
+                const localizedEndDt = moment(endDt).tz(momentTimezone);
 
-                if(businessWorkingHours[i].day === startDt.toLocaleString('en-us', { weekday: 'long' }).toLowerCase()) {
+                if(businessWorkingHours[i].day === localizedStartDt.format('dddd').toLowerCase()) {
                     // check if business is closed
                     if(businessWorkingHours[i].open === undefined || businessWorkingHours[i].close === undefined) return false;
                     // check if startDt is within business working hours
-                    const businessStartDt = new Date(startDt);
-                    businessStartDt.setHours(parseInt(businessWorkingHours[i].open.split(':')[0]));
-                    businessStartDt.setMinutes(parseInt(businessWorkingHours[i].open.split(':')[1]));
-                    if(startDt >= businessStartDt) {
+                    const businessStartDt = moment(localizedStartDt).set({
+                        hour: parseInt(businessWorkingHours[i].open.split(':')[0]),
+                        minute: parseInt(businessWorkingHours[i].open.split(':')[1])
+                    });
+                    if(localizedStartDt.isSameOrAfter(businessStartDt)) {
                         isStartDtWithinBusinessWorkingHours = true;
                     }
                 }
-                
-                if(businessWorkingHours[i].day === endDt.toLocaleString('en-us', { weekday: 'long' }).toLowerCase()) {
+
+                if(businessWorkingHours[i].day === localizedEndDt.format('dddd').toLowerCase()) {
                     // check if business is closed
                     if(businessWorkingHours[i].open === undefined || businessWorkingHours[i].close === undefined) return false;
                     // check if endDt is within business working hours
-                    const businessEndDt = new Date(endDt);
-                    businessEndDt.setHours(parseInt(businessWorkingHours[i].close.split(':')[0]));
-                    businessEndDt.setMinutes(parseInt(businessWorkingHours[i].close.split(':')[1]));
-                    if(endDt <= businessEndDt) {
+                    const businessEndDt = moment(localizedEndDt).set({
+                        hour: parseInt(businessWorkingHours[i].close.split(':')[0]),
+                        minute: parseInt(businessWorkingHours[i].close.split(':')[1])
+                    });
+                    if(localizedEndDt.isSameOrBefore(businessEndDt)) {
                         isEndDtWithinBusinessWorkingHours = true;
                     }
                 }
@@ -173,25 +181,29 @@ const CalendarService = {
             if(!isStartDtWithinBusinessWorkingHours || !isEndDtWithinBusinessWorkingHours) return false;
 
             // check if event startDt and endDt are within maximum days in future
-            const today = new Date();
-            const todayPlusMaxDays = new Date(today);
-            todayPlusMaxDays.setDate(today.getDate() + businessMaximumDaysInFuture);
-            if(startDt > todayPlusMaxDays || endDt > todayPlusMaxDays) return false;
+            const today = moment().tz(momentTimezone);
+            const todayPlusMaxDays = moment(today).add(businessMaximumDaysInFuture, 'days');
+            if(moment(startDt).isAfter(todayPlusMaxDays) || moment(endDt).isAfter(todayPlusMaxDays)) return false;
 
             // check if event startDt and endDt are within minimum time slots
-            const startDtPlusMinTimeSlots = new Date(startDt);
-            startDtPlusMinTimeSlots.setMinutes(startDt.getMinutes() + businessMinimumTimeSlots * businessSlotTime);
-            if(endDt < startDtPlusMinTimeSlots) return false;
+            const startDtPlusMinTimeSlots = moment(startDt).tz(momentTimezone).add(businessMinimumTimeSlots * businessSlotTime, 'minutes').toDate();
+            if(moment(endDt).tz(momentTimezone).isBefore(startDtPlusMinTimeSlots)) return false;
 
             // get events from calendars
-            const events = await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendarId) });
+            const query = { calendarId: new mongoose.Types.ObjectId(calendarId) };
+            if (subCalendarId) {
+                query.teamupSubCalendarIds = { '$in': [subCalendarId] };
+            }
+            const events = await DbService.getMany(COLLECTIONS.EVENTS, query);
             if(events) {
                 // check if event startDt and endDt are within existing events
                 for(let i = 0; i < events.length; i++) {
                     const event = events[i];
-                    const eventStartDt = new Date(event.start);
-                    const eventEndDt = new Date(event.end);
-                    if((startDt >= eventStartDt && startDt <= eventEndDt) || (endDt >= eventStartDt && endDt <= eventEndDt)) return false;
+                    const eventStartDt = moment(event.start).tz(momentTimezone);
+                    const eventEndDt = moment(event.end).tz(momentTimezone);
+                    if((moment(startDt).isBetween(eventStartDt, eventEndDt, null, '[)') || moment(endDt).isBetween(eventStartDt, eventEndDt, null, '(]'))) {
+                        return false;
+                    }
                 }
             }
 
