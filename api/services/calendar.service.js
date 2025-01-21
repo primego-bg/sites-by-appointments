@@ -36,8 +36,8 @@ const CalendarService = {
                             allDay: teamupEvent.all_day,
                             rrule: teamupEvent.rrule,
                             teamupEventId: teamupEvent.id,
-                            start: teamupEvent.start_dt,
-                            end: teamupEvent.end_dt
+                            start: moment(teamupEvent.start_dt).seconds(0).milliseconds(0).toISOString(),
+                            end: moment(teamupEvent.end_dt).seconds(0).milliseconds(0).toISOString()
                         });
                         await DbService.create(COLLECTIONS.EVENTS, newEvent);
                     }
@@ -85,8 +85,8 @@ const CalendarService = {
                         allDay: teamupEvent.all_day,
                         rrule: teamupEvent.rrule,
                         teamupEventId: teamupEvent.id,
-                        start: teamupEvent.start_dt,
-                        end: teamupEvent.end_dt
+                        start: moment(teamupEvent.start_dt).seconds(0).milliseconds(0).toISOString(),
+                        end: moment(teamupEvent.end_dt).seconds(0).milliseconds(0).toISOString()
                     });
                     await DbService.create(COLLECTIONS.EVENTS, newEvent);
                 }
@@ -121,8 +121,8 @@ const CalendarService = {
             const businessSlotTime = business.slotTime;
             const momentTimezone = calendar.timezone;
 
-            startDt = new Date(startDt);
-            endDt = new Date(endDt);
+            startDt = moment(startDt).seconds(0).milliseconds(0).toDate();
+            endDt = moment(endDt).seconds(0).milliseconds(0).toDate();
 
             // check if event startDt (ISO string) and endDt (ISO string) are within business working hours
             // the businessWorkingHours is an array that consists of objects with day, open and close properties
@@ -186,8 +186,8 @@ const CalendarService = {
                 // check if event startDt and endDt are within existing events
                 for(let i = 0; i < events.length; i++) {
                     const event = events[i];
-                    const eventStartDt = moment(event.start).tz(momentTimezone);
-                    const eventEndDt = moment(event.end).tz(momentTimezone);
+                    const eventStartDt = moment(event.start).tz(momentTimezone).seconds(0).milliseconds(0);
+                    const eventEndDt = moment(event.end).tz(momentTimezone).seconds(0).milliseconds(0);
                     if((moment(startDt).isBetween(eventStartDt, eventEndDt, null, '[)') || moment(endDt).isBetween(eventStartDt, eventEndDt, null, '(]'))) {
                         return false;
                     }
@@ -255,8 +255,8 @@ const CalendarService = {
                     if(events) {
                         for(let j = 0; j < events.length; j++) {
                             const event = events[j];
-                            const eventStartDt = moment(event.start).tz(calendar.timezone);
-                            const eventEndDt = moment(event.end).tz(calendar.timezone);
+                            const eventStartDt = moment(event.start).tz(calendar.timezone).seconds(0).milliseconds(0);
+                            const eventEndDt = moment(event.end).tz(calendar.timezone).seconds(0).milliseconds(0);
                             if((currentTime.isBetween(eventStartDt, eventEndDt, null, '[)') || endTime.isBetween(eventStartDt, eventEndDt, null, '(]'))) {
                                 isTimeSlotAvailable = false;
                                 break;
@@ -265,8 +265,8 @@ const CalendarService = {
                     }
                     if(isTimeSlotAvailable) {
                         availableTimeSlots.push({
-                            start: currentTime.toISOString(),
-                            end: endTime.toISOString()
+                            start: currentTime.seconds(0).milliseconds(0).toISOString(),
+                            end: endTime.seconds(0).milliseconds(0).toISOString()
                         });
                     }
                     currentTime.add(businessSlotTime, 'minutes');
@@ -298,7 +298,7 @@ const CalendarService = {
 
             let isTimeSlotValid = false;
             for(let i = 0; i < availableTimeSlots.length; i++) {
-                if(moment(startDt).isSame(availableTimeSlots[i].start) && moment(endDt).isSame(availableTimeSlots[i].end)) {
+                if(moment(startDt).seconds(0).milliseconds(0).isSame(availableTimeSlots[i].start) && moment(endDt).seconds(0).milliseconds(0).isSame(availableTimeSlots[i].end)) {
                     isTimeSlotValid = true;
                     break;
                 }

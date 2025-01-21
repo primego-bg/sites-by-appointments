@@ -33,6 +33,17 @@ const calendarSchema = mongoose.Schema({
         valid: moment.tz.names(),
         required: true,
     },
+    // used only for easier data management when creating employees through the admin api
+    teamupSubCalendarIds: [{
+        id: {
+            type: Number,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        }
+    }],
     lastSynchronized: {
         type: Date,
         required: false,

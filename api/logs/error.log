@@ -16,3 +16,30 @@
 {"clientIp":"::1","dt":1737420489755,"level":"error","message":"Calendar already set for this business"}
 {"clientIp":"::1","dt":1737495822736,"level":"error","message":"\"URLpostfix\" is required"}
 {"clientIp":"::1","dt":1737495837194,"level":"error","message":"\"isEmailSender\" is required"}
+{"clientIp":"::1","dt":1737498666452,"level":"error","message":"Business not found"}
+{"clientIp":"::1","dt":1737499122814,"level":"error","message":"mongoose is not defined"}
+{"clientIp":"::1","dt":1737499252138,"level":"error","message":"errors.invalid_id"}
+{"clientIp":"::1","dt":1737499302665,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499312525,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499338705,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499377480,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499403791,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499406171,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499407358,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499427118,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499428444,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499429342,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499430304,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499431124,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499432107,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499434863,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499498979,"level":"error","message":"errors.invalid_service"}
+{"clientIp":"::1","dt":1737499613091,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499616047,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499617048,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499617955,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499787497,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499789471,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499790352,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499790833,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737499791565,"level":"error","message":"errors.inactive"}
