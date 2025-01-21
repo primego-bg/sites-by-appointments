@@ -71,6 +71,19 @@ router.post('/', async (req, res, next) => {
         await DbService.create(COLLECTIONS.EVENTS, newEvent);
 
         // send email to customer
+        const customerEmail = req.body.email;
+        const emailSubject = `Вашият час за ${service.name} е потвърден`;
+        const emailMessage = `
+            Здравейте ${req.body.name},
+            
+            Потвърждение за вашия час:
+            
+            - Услуга: ${service.name}
+            - Дата: ${startDt.toDateString()}
+            - Час: ${startDt.toLocaleTimeString()} - ${endDt.toLocaleTimeString()}
+        `;
+
+        await EmailService.sendEmail(business._id, customerEmail, emailSubject, emailMessage);
 
         return res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
     } catch(err) {

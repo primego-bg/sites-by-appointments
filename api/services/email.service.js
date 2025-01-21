@@ -1,42 +1,73 @@
-//REMEMBER: app passwords get revoked when Google Account password changes
-
 const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, 
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-        rejectUnauthorized: true, 
-        minVersion: "TLSv1.2",   
-    },
-});
+const DbService = require('./db.service');
+const CryptoService = require('./crypto.service'); 
+const { COLLECTIONS } = require('../global');
 
 const EmailService = {
-    sendEmail: async (email, subject, message) => {
+    sendEmail: async (businessId, email, subject, message) => {
         try {
+            const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
+            if (!business || !business.isEmailSender) {
+                return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
+            }
+
+            const decryptedPassword = CryptoService.unhash(business.senderPassword);
+
+            const transporter = nodemailer.createTransport({
+                host: "smtp.gmail.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: "primego.bg@gmail.com", //business.senderEmail
+                    pass: "ngmgokzpngcokanu", //decryptedPassword
+                },
+                tls: {
+                    rejectUnauthorized: true,
+                    minVersion: "TLSv1.2",
+                },
+            });
+
             const mailOptions = {
-                from: process.env.EMAIL_USER, 
-                to: email,                    
-                subject: subject,             
-                text: message,                
-                /*html: `
-                    <div style="font-family: 'Inter', sans-serif; line-height: 1.6; color: #333;">
-                        <h1 style="color: #007BFF; font-weight: 600;">Hello!</h1>
-                            <p>${message}</p>
-                            <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
-                            <p style="font-size: 0.9em; color: #666;">
-                                This is a custom email sent from our service.<br>
-                                <strong style="font-weight: 600;">Thank you for using our platform!</strong>
-                            </p>
-                        </hr>    
+                from: business.senderEmail,
+                to: email,
+                subject: subject,
+                text: message,
+                html: `
+                    <div style="
+                        font-family: 'Inter', sans-serif; 
+                        line-height: 1.6; 
+                        color: #333; 
+                        font-size: 14px; 
+                        margin: 0; 
+                        padding: 16px; 
+                        background-color: #f9f9f9; 
+                        border: 1px solid #ddd; 
+                        border-radius: 8px;
+                    ">
+                        <p style="margin: 0 0 16px;">
+                            ${message}
+                        </p>
+                        <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
+                        <p style="font-size: 0.9em; color: #666; margin: 0;">
+                            Ако имате въпроси, свържете се с нас на: 
+                            <br>
+                            <strong>Имейл:</strong> 
+                            <a href="mailto:${business.email}" style="color: #007BFF; text-decoration: none;">${business.email}</a> 
+                            <br>
+                            <strong>Телефон:</strong> 
+                            <a href="tel:${business.phone}" style="color: #007BFF; text-decoration: none;">${business.phone}</a> 
+                            <br>
+                            <strong>Уебсайт:</strong> 
+                            <a href="${business.website}" style="color: #007BFF; text-decoration: none;">${business.website}</a>
+                            <br><br>
+                            <strong>Поздрави,</strong>
+                            <br>
+                            Екипът на ${business.name}.
+                        </p>
                     </div>
-                `*/
+                `
             };
+
             const info = await transporter.sendMail(mailOptions);
             console.log('Email sent: ' + info.response);
             return { success: true, message: 'Email sent successfully!' };
