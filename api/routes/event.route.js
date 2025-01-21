@@ -72,7 +72,49 @@ router.post('/', async (req, res, next) => {
 
         return res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
     } catch(err) {
-        return next(new ResponseError(err.message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+        return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+    }
+});
+
+router.get('/available', async (req, res, next) => {
+    try {
+        const calendarId = new mongoose.Types.ObjectId(req.query.calendarId);
+        const employeeId = req.query.employeeId;
+        const serviceId = req.query.serviceId;
+        if(!calendarId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
+        if(!employeeId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
+        if(!serviceId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
+
+        const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
+        if(!calendar) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(calendar.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(calendar.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
+
+        const business = await DbService.getById(COLLECTIONS.BUSINESSES, calendar.businessId);
+        if(!business) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(business.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(business.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
+
+        const service = await DbService.getById(COLLECTIONS.SERVICES, serviceId);
+        if(!service) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(service.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
+        if(service.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(service.businessId.toString() !== calendar.businessId.toString()) return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
+
+        const employee = await DbService.getById(COLLECTIONS.EMPLOYEES, employeeId);
+        if(!employee) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(employee.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
+        if(employee.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
+        if(employee.businessId.toString() !== calendar.businessId.toString()) return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
+
+        if(!employee.services.includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
+
+        const serviceDuration = service.timeSlots;
+        const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(business._id, serviceDuration, employee.teamupSubCalendarId);
+        
+        return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots);
+    } catch(err) {
+        return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
 
