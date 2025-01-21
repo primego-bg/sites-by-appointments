@@ -24,6 +24,16 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
 
     try
     {
+        const existingBusiness = await DbService.getById(COLLECTIONS.BUSINESSES, req.body.businessId);
+        if (!existingBusiness || existingBusiness.status === 'deleted') 
+        {
+            return next(new ResponseError('Business not found', HTTP_STATUS_CODES.NOT_FOUND));
+        }
+        if(existingBusiness.status !== 'active')
+        {
+            return next(new ResponseError('Business is inactive', HTTP_STATUS_CODES.CONFLICT));
+        }
+
         const existingCalendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(req.body.businessId) });
         if (existingCalendar) {
             return next(new ResponseError('Calendar already set for this business', HTTP_STATUS_CODES.CONFLICT));
@@ -34,6 +44,7 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
 
         const newCalendar = new Calendar(req.body);
         newCalendar.timezone = result.date_time.tz;
+        newCalendar.teamupSubCalendarIds = result.subcalendars.map(subcalendar => ({ id: subcalendar.id, name: subcalendar.name }));
         await DbService.create(COLLECTIONS.CALENDARS, newCalendar);
 
         const events = await TeamupService.getInitialEvents(req.body.teamupSecretCalendarKey, req.body.teamupApiKey, new Date().toISOString());

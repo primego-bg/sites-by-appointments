@@ -4,6 +4,7 @@ const { default: mongoose } = require('mongoose');
 const router = express.Router();
 const DbService = require('../services/db.service');
 const CalendarService = require('../services/calendar.service');
+const ResponseError = require('../errors/responseError');
 
 router.post('/', async (req, res, next) => {
     const { error } = eventPostValidation(req.body);
@@ -94,8 +95,8 @@ router.post('/', async (req, res, next) => {
 router.get('/available', async (req, res, next) => {
     try {
         const calendarId = new mongoose.Types.ObjectId(req.query.calendarId);
-        const employeeId = req.query.employeeId;
-        const serviceId = req.query.serviceId;
+        const employeeId = new mongoose.Types.ObjectId(req.query.employeeId);
+        const serviceId = new mongoose.Types.ObjectId(req.query.serviceId);
         if(!calendarId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
         if(!employeeId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
         if(!serviceId) return next(new ResponseError("errors.invalid_id", HTTP_STATUS_CODES.BAD_REQUEST));
@@ -122,9 +123,10 @@ router.get('/available', async (req, res, next) => {
         if(employee.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(employee.businessId.toString() !== calendar.businessId.toString()) return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
 
-        if(!employee.services.includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
+        console.log(employee, service);
+        if(!employee.services.map(serviceId => serviceId.toString()).includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
 
-        const serviceDuration = service.timeSlots;
+        const serviceDuration = service.timeSlots * business.slotTime;
         const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(business._id, serviceDuration, employee.teamupSubCalendarId);
         
         return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots);

@@ -1,14 +1,19 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const mongo = require("./db/mongo");
 const indexRoute = require('./routes/index.route');
 const errorHandler = require('./errors/errorHandler');
 const dotenv = require('dotenv');
-const TeamupService = require('./services/teamup.service');
 const CalendarService = require('./services/calendar.service');
-const CryptoService = require('./services/crypto.service');
 const EmailService = require('./services/email.service');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests, please try again later.'
+});
 
 dotenv.config();
 
@@ -18,6 +23,7 @@ app
         limit: '10mb'
     }))
     .use(express.urlencoded({ extended: true, limit: '10mb' }))
+    .use('/', limiter)
     .use("/", indexRoute)
     .use(errorHandler)
 
