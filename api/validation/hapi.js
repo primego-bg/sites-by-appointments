@@ -125,9 +125,9 @@ const eventPostValidation = (data) => {
             }
             return value;
         }).required(),
-        name: Joi.string().required(),
+        name: Joi.string().min(3).max(100).required(),
         email: Joi.string().email().required(),
-        phone: Joi.string().pattern(/^[0-9]{10,15}$/).required(),
+        phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
     });
 
     return schema.validate(data);
