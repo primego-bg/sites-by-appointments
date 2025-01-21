@@ -60,13 +60,6 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
     }
 });
 
-router.post("/sync", async (req, res, next) => {
-    console.log(new Date("2025-01-20T23:24:46.985+00:00").getTime());
-    const results = await TeamupService.getModifiedEvents("kspp6eerhhtv6a2h8t", "5ae4cf471d2409b3ded388b38660835afdc31d1574ae4d7a71d0342ffc0eda5c", 1737323260);
-    console.log(results);
-    return res.sendStatus(HTTP_STATUS_CODES.OK);
-})
-
 router.get('/:id', async (req, res, next) => {
     if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
     {
