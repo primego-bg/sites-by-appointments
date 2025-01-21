@@ -1,16 +1,11 @@
-"use client";
-import React from 'react'
-import { Calendar } from "@/components/ui/calendar"
+import Form from '@/components/form'
 
-export default function page() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
-
+export default function Home() {
   return (
-      <Calendar
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        className="rounded-md border"
-      />
+    <section className='py-24'>
+      <div className='container'>
+        <Form />
+      </div>
+    </section>
   )
 }
