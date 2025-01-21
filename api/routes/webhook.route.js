@@ -4,6 +4,8 @@ const DbService = require('../services/db.service');
 const { COLLECTIONS } = require('../global');
 const { Event } = require('../db/models/Event.model');
 const { default: mongoose } = require('mongoose');
+const TeamupService = require('../services/teamup.service');
+const CalendarService = require('../services/calendar.service');
 const router = express.Router();
 
 router.post('/event', async (req, res, next) => {
@@ -48,7 +50,26 @@ router.post('/event', async (req, res, next) => {
                 break;
             case 'event.modified':
                 // Do something when an event is modified
-                
+                if(!event.rrule) {
+                    await DbService.delete(COLLECTIONS.EVENTS, { teamupEventId: eventId });
+                    const modifiedEvent = new Event({
+                        calendarId: new mongoose.Types.ObjectId(calendar._id),
+                        teamupSubCalendarIds: event.subcalendar_ids,
+                        allDay: event.all_day,
+                        rrule: event.rrule,
+                        teamupEventId: eventId,
+                        start: event.start_dt,
+                        end: event.end_dt
+                    });
+
+                    await DbService.create(COLLECTIONS.EVENTS, modifiedEvent);
+                } else {
+                    try {
+                        await CalendarService.syncCalendar(calendar._id);
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
                 break;
             case 'event.deleted':
                 await DbService.delete(COLLECTIONS.EVENTS, { teamupEventId: eventId });
