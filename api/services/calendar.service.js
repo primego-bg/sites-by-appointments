@@ -103,19 +103,6 @@ const CalendarService = {
             return null;
         }
     },
-    updateLastSynchronized: async (calendarId) => {
-        try {
-            const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
-            if(!calendar) return null;
-            await DbService.update(COLLECTIONS.CALENDARS, 
-                { _id: new mongoose.Types.ObjectId(calendarId)}, 
-                { lastSynchronized: new Date().toISOString() });
-            return true;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
-    },
     checkAvailability: async (calendarId, startDt, endDt, subCalendarId=null) => {
         try {
             // startDt and endDt are ISO strings
@@ -233,7 +220,6 @@ const CalendarService = {
             
             const availableTimeSlots = [];
             const today = moment().tz(calendar.timezone);
-            const todayPlusMaxDays = moment(today).add(businessMaximumDaysInFuture, 'days');
 
             // get all available time slots
             // iterate through each day from today to todayPlusMaxDays
@@ -259,7 +245,7 @@ const CalendarService = {
                         break;
                     }
                 }
-                if(!isBusinessOpen) break;
+                if(!isBusinessOpen) continue;
 
                 // get all time slots for the current day
                 let currentTime = moment(businessOpenTime);

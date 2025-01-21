@@ -70,6 +70,8 @@ router.post('/', async (req, res, next) => {
         newEvent.teamupEventId = teamupEvent.id;
         await DbService.create(COLLECTIONS.EVENTS, newEvent);
 
+        // send email to customer
+
         return res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
     } catch(err) {
         return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));

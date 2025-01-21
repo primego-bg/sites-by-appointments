@@ -10,15 +10,11 @@ const businessHoursSchema = new mongoose.Schema({
     },
     open: {
       type: String, // Format: "HH:mm" (24-hour time)
-      required: function () {
-        return !this.isClosed;
-      },
+      required: true,
     },
     close: {
       type: String, // Format: "HH:mm" (24-hour time)
-      required: function () {
-        return !this.isClosed;
-      },
+      required: true,
     }
 });
 

@@ -24,6 +24,7 @@ const eventSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    // iso string
     start: {
         type: Date,
         required: true

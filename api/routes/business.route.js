@@ -52,7 +52,6 @@ router.get('/:URLpostfix', async (req, res, next) => {
             return next(new ResponseError('errors.inactive', HTTP_STATUS_CODES.CONFLICT));
         }
 
-        //TODO: shall get all business info relevant to the frontend
         const businessInfo = {
             name: business.name,
             description: business.description,
@@ -62,6 +61,7 @@ router.get('/:URLpostfix', async (req, res, next) => {
             email: business.email,
             socialMedia: business.socialMedia,
             workingHours: business.workingHours,
+            availableCalendar: true
         };
 
         const services = await DbService.getMany(COLLECTIONS.SERVICES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
@@ -72,6 +72,9 @@ router.get('/:URLpostfix', async (req, res, next) => {
 
         const employees = await DbService.getMany(COLLECTIONS.EMPLOYEES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
         businessInfo.employees = employees;
+
+        const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(business._id) });
+        if(!calendar || calendar.status !== 'active') business.availableCalendar = false;
 
         return res.status(HTTP_STATUS_CODES.OK).send({
             business
@@ -97,8 +100,6 @@ router.put('/:id', adminAuthenticate, async (req, res, next) => {
 
     try
     {
-        
-
         const businessId = new mongoose.Types.ObjectId(req.params.id);
         const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
 
