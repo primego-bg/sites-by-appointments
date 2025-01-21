@@ -13,3 +13,4 @@
 {"clientIp":"::1","dt":1737413905186,"level":"error","message":"\"teamupCalendarId\" is required"}
 {"clientIp":"::1","dt":1737414610649,"level":"error","message":"Calendar already set for this business"}
 {"clientIp":"::1","dt":1737416710260,"level":"error","message":"errors.invalid_id"}
+{"clientIp":"::1","dt":1737420489755,"level":"error","message":"Calendar already set for this business"}

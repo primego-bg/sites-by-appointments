@@ -11,30 +11,41 @@ const CalendarService = {
             for(let calendar of calendars) {
                 await DbService.update(COLLECTIONS.CALENDARS, { _id: new mongoose.Types.ObjectId(calendar._id) }, { status: "inactive" });
 
+                let usedIds = [];
+
                 const lastSyncDate = calendar.lastSynchronized 
-                    ? new Date(new Date(calendar.lastSynchronized).getTime() - 86400000).toISOString() 
-                    : new Date(Date.now() - 86400000).toISOString();
+                    ? new Date(new Date(calendar.lastSynchronized).getTime()).toISOString() 
+                    : new Date(Date.now()).toISOString();
 
                 const teamupEvents = await TeamupService.getInitialEvents(calendar.teamupSecretCalendarKey, calendar.teamupApiKey, lastSyncDate);
-                console.log(teamupEvents);
-                for(let teamupEvent of teamupEvents) {
-                    if(teamupEvent.rrule) {
-                        await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: { $regex: `^${teamupEvent.id}` } });
-                    } else {
-                        await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: teamupEvent.id });
+                if(teamupEvents) {
+                    for(let teamupEvent of teamupEvents) {
+                        usedIds.push(teamupEvent.id);
+                        if(teamupEvent.rrule) {
+                            await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: { $regex: `^${teamupEvent.id}` } });
+                        } else {
+                            await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: teamupEvent.id });
+                        }
+    
+                        if(teamupEvent.deleted_dt) continue;
+    
+                        const newEvent = new Event({
+                            calendarId: new mongoose.Types.ObjectId(calendar._id),
+                            teamupSubCalendarIds: teamupEvent.subcalendar_ids,
+                            allDay: teamupEvent.all_day,
+                            rrule: teamupEvent.rrule,
+                            teamupEventId: teamupEvent.id,
+                            start: teamupEvent.start_dt,
+                            end: teamupEvent.end_dt
+                        });
+                        await DbService.create(COLLECTIONS.EVENTS, newEvent);
                     }
+                } 
 
-                    const newEvent = new Event({
-                        calendarId: new mongoose.Types.ObjectId(calendar._id),
-                        teamupSubCalendarIds: teamupEvent.subcalendar_ids,
-                        allDay: teamupEvent.all_day,
-                        rrule: teamupEvent.rrule,
-                        teamupEventId: teamupEvent.id,
-                        start: teamupEvent.start_dt,
-                        end: teamupEvent.end_dt
-                    });
-                    await DbService.create(COLLECTIONS.EVENTS, newEvent);
-                }
+                await DbService.deleteMany(COLLECTIONS.EVENTS, {
+                    calendarId: new mongoose.Types.ObjectId(calendar._id),
+                    teamupEventId: { $nin: usedIds }
+                });
 
                 await DbService.update(COLLECTIONS.CALENDARS, { _id: new mongoose.Types.ObjectId(calendar._id) }, { lastSynchronized: new Date(), status: "active" });
             }
