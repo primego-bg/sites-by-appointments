@@ -8,6 +8,7 @@ const adminAuthenticate = require('../middlewares/adminAuthenticate');
 const { locationPostValidation, locationPutValidation } = require('../validation/hapi');
 const { default: mongoose } = require('mongoose');
 const { Location } = require('../db/models/Location.model');
+const ResponseError = require('../errors/responseError');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
     const { error } = locationPostValidation(req.body);

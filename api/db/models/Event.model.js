@@ -8,9 +8,18 @@ const eventSchema = mongoose.Schema({
         required: true
     },
     teamupSubCalendarIds: [{
-        type: String,
+        type: Number,
         required: true
     }],
+    allDay: {
+        type: Boolean,
+        default: false,
+    },
+    rrule: {
+        type: String,
+        required: false,
+        default: undefined
+    },
     teamupEventId: {
         type: String,
         required: true,

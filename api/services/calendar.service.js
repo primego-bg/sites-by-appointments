@@ -1,8 +1,48 @@
 const { default: mongoose } = require('mongoose');
 const { COLLECTIONS } = require('../global');
 const DbService = require('./db.service');
+const TeamupService = require('./teamup.service');
+const { Event } = require('../db/models/Event.model');
 
 const CalendarService = {
+    syncAllCalendars: async () => {
+        try {
+            const calendars = await DbService.getMany(COLLECTIONS.CALENDARS, {});
+            for(let calendar of calendars) {
+                await DbService.update(COLLECTIONS.CALENDARS, { _id: new mongoose.Types.ObjectId(calendar._id) }, { status: "inactive" });
+
+                const lastSyncDate = calendar.lastSynchronized 
+                    ? new Date(new Date(calendar.lastSynchronized).getTime() - 86400000).toISOString() 
+                    : new Date(Date.now() - 86400000).toISOString();
+
+                const teamupEvents = await TeamupService.getInitialEvents(calendar.teamupSecretCalendarKey, calendar.teamupApiKey, lastSyncDate);
+                console.log(teamupEvents);
+                for(let teamupEvent of teamupEvents) {
+                    if(teamupEvent.rrule) {
+                        await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: { $regex: `^${teamupEvent.id}` } });
+                    } else {
+                        await DbService.deleteMany(COLLECTIONS.EVENTS, { teamupEventId: teamupEvent.id });
+                    }
+
+                    const newEvent = new Event({
+                        calendarId: new mongoose.Types.ObjectId(calendar._id),
+                        teamupSubCalendarIds: teamupEvent.subcalendar_ids,
+                        allDay: teamupEvent.all_day,
+                        rrule: teamupEvent.rrule,
+                        teamupEventId: teamupEvent.id,
+                        start: teamupEvent.start_dt,
+                        end: teamupEvent.end_dt
+                    });
+                    await DbService.create(COLLECTIONS.EVENTS, newEvent);
+                }
+
+                await DbService.update(COLLECTIONS.CALENDARS, { _id: new mongoose.Types.ObjectId(calendar._id) }, { lastSynchronized: new Date(), status: "active" });
+            }
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    },
     updateLastSynchronized: async (calendarId) => {
         try {
             const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);

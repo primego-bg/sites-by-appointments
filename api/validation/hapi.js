@@ -204,13 +204,12 @@ const calendarPostValidation = (data) => {
     const schema = Joi.object({
         businessId: objectIdValidation.required(),
         integration: Joi.string().valid(...Object.values(INTEGRATIONS)).required(),
-        teamupCalendarId: Joi.string().when('integration', {
+        teamupSecretCalendarKey: Joi.string().when('integration', {
             is: INTEGRATIONS.TEAMUP,
             then: Joi.required(),
             otherwise: Joi.optional()
         }),
         teamupApiKey: teamupApiKeyValidation,
-        lastSynchronized: Joi.date().optional().allow(null),
         status: Joi.string().valid('active', 'deleted').required()
     });
 

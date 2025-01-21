@@ -5,6 +5,8 @@ const mongo = require("./db/mongo");
 const indexRoute = require('./routes/index.route');
 const errorHandler = require('./errors/errorHandler');
 const dotenv = require('dotenv');
+const TeamupService = require('./services/teamup.service');
+const CalendarService = require('./services/calendar.service');
 
 dotenv.config();
 
@@ -26,3 +28,7 @@ const port = process.env.PORT;
 app.listen(port, function () {
     console.log("API server listening on port " + port);
 });
+
+(async function init() { 
+    CalendarService.syncAllCalendars();
+})();

@@ -10,12 +10,6 @@ const calendarSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    teamupCalendarId: {
-        type: String,
-        required: function () {
-            return this.integration === INTEGRATIONS.TEAMUP;
-        }
-    },
     integration: {
         type: String,
         enum: Object.values(INTEGRATIONS),
@@ -34,16 +28,6 @@ const calendarSchema = mongoose.Schema({
             return this.integration === INTEGRATIONS.TEAMUP;
         }
     },
-    timezone: {
-        type: String,
-        required: true,
-        validate: {
-            validator: function (timezone) {
-                return moment.tz.names().includes(timezone);
-            },
-            message: "Invalid timezone"
-        }
-    },
     lastSynchronized: {
         type: Date,
         required: false,
@@ -51,7 +35,7 @@ const calendarSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["active", "deleted"],
+        enum: ["active", "inactive", "deleted"],
         required: true
     }
 });

@@ -7,3 +7,9 @@
 {"clientIp":"::1","dt":1737411494413,"level":"error","message":"Business already exists"}
 {"clientIp":"::1","dt":1737411630086,"level":"error","message":"Business already exists"}
 {"clientIp":"::1","dt":1737411704145,"level":"error","message":"Business already exists"}
+{"clientIp":"::1","dt":1737411838325,"level":"error","message":"\"name\" is required"}
+{"clientIp":"::1","dt":1737412414476,"level":"error","message":"\"name\" is required"}
+{"clientIp":"::1","dt":1737413098232,"level":"error","message":"\"businessId\" is required"}
+{"clientIp":"::1","dt":1737413905186,"level":"error","message":"\"teamupCalendarId\" is required"}
+{"clientIp":"::1","dt":1737414610649,"level":"error","message":"Calendar already set for this business"}
+{"clientIp":"::1","dt":1737416710260,"level":"error","message":"errors.invalid_id"}

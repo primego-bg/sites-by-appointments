@@ -128,6 +128,15 @@ const DbService = {
         })
     },
 
+    deleteMany: function (collection, filter) {
+        return new Promise((resolve, reject) => {
+            validateCollection(collection, reject);
+            db.collection(collection).deleteMany(filter).then(resolve).catch((error) => {
+                reject(new ResponseError(error.message, HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
+            });
+        })
+    },
+
 
 
     getWithFilterAndProduct: function (collection, filter, product) {

@@ -8,6 +8,7 @@ const adminAuthenticate = require('../middlewares/adminAuthenticate');
 const { servicePostValidation, servicePutValidation } = require('../validation/hapi');
 const { default: mongoose } = require('mongoose');
 const { Service } = require('../db/models/Service.model');
+const ResponseError = require('../errors/responseError');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
     const { error } = servicePostValidation(req.body);

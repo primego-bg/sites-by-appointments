@@ -77,7 +77,7 @@ const TeamupService = {
             return null;
         }
     },
-    syncModifiedEvents: async (teamupSecretCalendarKey, teamupApiKey, lastSynchronizedDt) => {
+    getModifiedEvents: async (teamupSecretCalendarKey, teamupApiKey, lastSynchronizedDt) => {
         try {
             const response = await axios.get(`https://api.teamup.com/${teamupSecretCalendarKey}/events?modifiedSince=${lastSynchronizedDt}`, {
                 headers: {
@@ -87,7 +87,7 @@ const TeamupService = {
 
             return response.data.events;
         } catch (error) {
-            console.error(error);
+            console.error(error.response.data.error);
             return null;
         }
     },
