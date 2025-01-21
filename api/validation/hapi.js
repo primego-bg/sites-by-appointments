@@ -115,9 +115,19 @@ const eventPostValidation = (data) => {
             }
             return value;
         }).required(),
-        subCalendarId: Joi.string().required(),
-        start: Joi.date().required(),
-        end: Joi.date().required(),
+        teamupSubCalendarId: Joi.string().required(),
+        // iso strings
+        startDt: Joi.date().required(),
+        endDt: Joi.date().required(),
+        serviceId: Joi.string().custom((value, helpers) => {
+            if (!mongoose.Types.ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        }).required(),
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        phone: Joi.string().pattern(/^[0-9]{10,15}$/).required(),
     });
 
     return schema.validate(data);

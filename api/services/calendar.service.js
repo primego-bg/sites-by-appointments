@@ -292,7 +292,7 @@ const CalendarService = {
             return null;
         }
     },
-    checkTimeSlotValidity: async (calendarId, startDt, endDt, teamupSubCalendarId=null) => {
+    checkTimeSlotValidityAndAvailability: async (calendarId, startDt, endDt, teamupSubCalendarId=null) => {
         try {
             // startDt and endDt are ISO strings
 
