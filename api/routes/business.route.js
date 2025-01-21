@@ -34,7 +34,7 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
     }
 });
 
-router.get('/:id', async (req, res, next) => { 
+router.get('/:URLpostfix', async (req, res, next) => { 
     if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
     {
         return next(new ResponseError('errors.invalid_id', HTTP_STATUS_CODES.BAD_REQUEST));
@@ -42,8 +42,7 @@ router.get('/:id', async (req, res, next) => {
     try
     {
 
-        const businessId = new mongoose.Types.ObjectId(req.params.id);
-        const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
+        const business = await DbService.getOne(COLLECTIONS.BUSINESSES, { URLpostfix: req.params.URLpostfix });
 
         if (!business || business.status === 'deleted') 
         {
@@ -54,9 +53,28 @@ router.get('/:id', async (req, res, next) => {
         }
 
         //TODO: shall get all business info relevant to the frontend
+        const businessInfo = {
+            name: business.name,
+            description: business.description,
+            logo: business.logo,
+            website: business.website,
+            phone: business.phone,
+            email: business.email,
+            socialMedia: business.socialMedia,
+            workingHours: business.workingHours,
+        };
+
+        const services = await DbService.getMany(COLLECTIONS.SERVICES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
+        businessInfo.services = services;
+
+        const locations = await DbService.getMany(COLLECTIONS.LOCATIONS, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
+        businessInfo.locations = locations;
+
+        const employees = await DbService.getMany(COLLECTIONS.EMPLOYEES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
+        businessInfo.employees = employees;
 
         return res.status(HTTP_STATUS_CODES.OK).send({
-            business: business
+            business
         });
     }
     catch (error)
