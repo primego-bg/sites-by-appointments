@@ -39,6 +39,18 @@ const businessSchema = mongoose.Schema({
         type: String,
         required: false
     },
+    isEmailSender: {
+        type: Boolean,
+        default: false
+    },
+    senderEmail: {
+        type: String,
+        required: () => this.isEmailSender
+    },
+    senderPassword: {
+        type: String,
+        required: () => this.isEmailSender,
+    },
     website: {
         type: String,
         required: false,

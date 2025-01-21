@@ -12,6 +12,8 @@ const ResponseError = require('../errors/responseError');
 const { DEFAULT_ERROR_MESSAGE, HTTP_STATUS_CODES, COLLECTIONS } = require('../global');
 const { Business } = require('../db//models/Business.model');
 const adminAuthenticate = require('../middlewares/adminAuthenticate');
+const crypto = require('crypto');
+const CryptoService = require('../services/crypto.service');
 
 router.post('/', adminAuthenticate, async (req, res, next) => {
     const { error } = businessPostValidation(req.body);
@@ -24,6 +26,8 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
         if(existingBusiness) return next(new ResponseError('Business already exists', HTTP_STATUS_CODES.CONFLICT));
 
         const newBusiness = new Business(req.body);
+        if(req.body.senderPassword) newBusiness.senderPassword = CryptoService.hash(req.body.senderPassword);
+
         await DbService.create(COLLECTIONS.BUSINESSES, newBusiness);
 
         return res.sendStatus(HTTP_STATUS_CODES.CREATED);

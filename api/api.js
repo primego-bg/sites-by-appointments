@@ -7,6 +7,7 @@ const errorHandler = require('./errors/errorHandler');
 const dotenv = require('dotenv');
 const TeamupService = require('./services/teamup.service');
 const CalendarService = require('./services/calendar.service');
+const CryptoService = require('./services/crypto.service');
 
 dotenv.config();
 

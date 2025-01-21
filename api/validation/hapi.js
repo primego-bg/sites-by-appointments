@@ -174,6 +174,9 @@ const businessPostValidation = (data) => {
         maximumDaysInFuture: Joi.number().min(1).max(60).required(),
         minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).required(),
         status: Joi.string().valid('active', 'inactive', 'deleted').required(),
+        isEmailSender: Joi.boolean().required(),
+        senderEmail: Joi.string().email().when('isEmailSender', { is: true, then: Joi.required() }),
+        senderPassword: Joi.string().when('isEmailSender', { is: true, then: Joi.required() }),
     });
 
     return schema.validate(data);
