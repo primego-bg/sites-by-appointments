@@ -6,23 +6,11 @@ export const FormDataSchema = z.object({
   service: z.string().min(1, 'Услугата е задължителна'),
   data: z.string().min(1, 'Дата е задължителна'),
   hour: z.string().min(1, 'Часът е задължителен'),
-  name: z.string().min(1, 'Името е задължително'),
-  phone: z.string().min(1, 'Телефонният номер е задължителен'),
-  email: z.string().min(1, 'Имейл е задължителен').email('Невалиден имейл адрес'),
+  name: z.string().min(1, 'Името е задължително').max(50, 'Името не може да съдържа повече от 50 символа'),
+  phone: z.string().min(10, 'Телефонният номер трябва да съдържа поне 10 цифри').max(15, 'Телефонният номер не може да съдържа повече от 15 цифри').regex(/^\+?[0-9]*$/, 'Телефонният номер трябва да съдържа само цифри и може да започва с +'),
+  email: z.string().min(5, 'Имейлът трябва да съдържа поне 5 символа').max(100, 'Имейлът не може да съдържа повече от 100 символа').email('Невалиден имейл адрес'),
   note: z.string().optional(),
   confirm: z.boolean().refine(val => val === true, {
     message: 'Трябва да потвърдите информацията си'
   })
-})
-
-
-export const FormDataSchemaOLD = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
-  country: z.string().min(1, 'Country is required'),
-  street: z.string().min(1, 'Street is required'),
-  city: z.string().min(1, 'City is required'),
-  state: z.string().min(1, 'State is required'),
-  zip: z.string().min(1, 'Zip is required')
 })
