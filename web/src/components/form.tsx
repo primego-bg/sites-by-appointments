@@ -12,16 +12,25 @@ type Inputs = z.infer<typeof FormDataSchema>
 
 const steps = [
   {
-    id: 'Step 1',
-    name: 'Personal Information',
-    fields: ['firstName', 'lastName', 'email']
+    id: 'Стъпка 1',
+    name: 'Избиране на услуга',
+    fields: ['location', 'barber', 'service']
   },
   {
-    id: 'Step 2',
-    name: 'Address',
-    fields: ['country', 'state', 'city', 'street', 'zip']
+    id: 'Стъпка 2',
+    name: 'Избиране на дата и час',
+    fields: ['data', 'hour']
   },
-  { id: 'Step 3', name: 'Complete' }
+  {
+    id: 'Стъпка 3',
+    name: 'Вашите данни',
+    fields: ['name', 'phone', 'email', 'note']
+  },
+  {
+    id: 'Стъпка 4',
+    name: 'Потвърждение',
+    fields: ['confirm']
+  }
 ]
 
 export default function Form() {
@@ -71,14 +80,14 @@ export default function Form() {
 
   return (
     <section className='absolute inset-0 flex flex-col justify-between p-24'>
-      {/* steps */}
+      {/* Steps Navigation */}
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
           {steps.map((step, index) => (
             <li key={step.name} className='md:flex-1'>
               {currentStep > index ? (
                 <div className='group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                  <span className='text-sm font-medium text-sky-600 transition-colors '>
+                  <span className='text-sm font-medium text-sky-600 transition-colors'>
                     {step.id}
                   </span>
                   <span className='text-sm font-medium'>{step.name}</span>
@@ -108,6 +117,7 @@ export default function Form() {
 
       {/* Form */}
       <form className='mt-12 py-12' onSubmit={handleSubmit(processForm)}>
+        {/* Step 1 */}
         {currentStep === 0 && (
           <motion.div
             initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -115,84 +125,73 @@ export default function Form() {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Personal Information
+              Избиране на услуга
             </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Provide your personal details.
-            </p>
-            <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
+            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
               <div className='sm:col-span-3'>
                 <label
-                  htmlFor='firstName'
+                  htmlFor='location'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  First name
+                  Локация
                 </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='firstName'
-                    {...register('firstName')}
-                    autoComplete='given-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.firstName?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.firstName.message}
-                    </p>
-                  )}
-                </div>
+                <select
+                  id='location'
+                  {...register('location')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                >
+                  <option value='Локация 1'>Локация 1</option>
+                  <option value='Локация 2'>Локация 2</option>
+                </select>
+                {errors.location && (
+                  <span className='text-sm text-red-600'>{errors.location.message}</span>
+                )}
               </div>
 
               <div className='sm:col-span-3'>
                 <label
-                  htmlFor='lastName'
+                  htmlFor='barber'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  Last name
+                  Бръснар
                 </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='lastName'
-                    {...register('lastName')}
-                    autoComplete='family-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.lastName?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.lastName.message}
-                    </p>
-                  )}
-                </div>
+                <select
+                  id='barber'
+                  {...register('barber')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                >
+                  <option value='Бръснар 1'>Бръснар 1</option>
+                  <option value='Бръснар 2'>Бръснар 2</option>
+                </select>
+                {errors.barber && (
+                  <span className='text-sm text-red-600'>{errors.barber.message}</span>
+                )}
               </div>
 
-              <div className='sm:col-span-4'>
+              <div className='sm:col-span-3'>
                 <label
-                  htmlFor='email'
+                  htmlFor='service'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  Email address
+                  Услуга
                 </label>
-                <div className='mt-2'>
-                  <input
-                    id='email'
-                    type='email'
-                    {...register('email')}
-                    autoComplete='email'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.email?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
+                <select
+                  id='service'
+                  {...register('service')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                >
+                  <option value='Услуга 1'>Услуга 1</option>
+                  <option value='Услуга 2'>Услуга 2</option>
+                </select>
+                {errors.service && (
+                  <span className='text-sm text-red-600'>{errors.service.message}</span>
+                )}
               </div>
             </div>
           </motion.div>
         )}
 
+        {/* Step 2 */}
         {currentStep === 1 && (
           <motion.div
             initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -200,193 +199,204 @@ export default function Form() {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Address
+              Избиране на дата и час
             </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Address where you can receive mail.
-            </p>
-
-            <div className='mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6'>
+            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
               <div className='sm:col-span-3'>
                 <label
-                  htmlFor='country'
+                  htmlFor='data'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  Country
+                  Дата
                 </label>
-                <div className='mt-2'>
-                  <select
-                    id='country'
-                    {...register('country')}
-                    autoComplete='country-name'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:max-w-xs sm:text-sm sm:leading-6'
-                  >
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
-                  </select>
-                  {errors.country?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.country.message}
-                    </p>
-                  )}
-                </div>
+                <input
+                  type='date'
+                  id='data'
+                  {...register('data')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                />
+                {errors.data && (
+                  <span className='text-sm text-red-600'>{errors.data.message}</span>
+                )}
               </div>
 
-              <div className='col-span-full'>
+              <div className='sm:col-span-3'>
                 <label
-                  htmlFor='street'
+                  htmlFor='hour'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
-                  Street address
+                  Час
                 </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='street'
-                    {...register('street')}
-                    autoComplete='street-address'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.street?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.street.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2 sm:col-start-1'>
-                <label
-                  htmlFor='city'
-                  className='block text-sm font-medium leading-6 text-gray-900'
+                <select
+                  id='hour'
+                  {...register('hour')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                 >
-                  City
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='city'
-                    {...register('city')}
-                    autoComplete='address-level2'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.city?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.city.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='state'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  State / Province
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='state'
-                    {...register('state')}
-                    autoComplete='address-level1'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.state?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.state.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='zip'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  ZIP / Postal code
-                </label>
-                <div className='mt-2'>
-                  <input
-                    type='text'
-                    id='zip'
-                    {...register('zip')}
-                    autoComplete='postal-code'
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
-                  />
-                  {errors.zip?.message && (
-                    <p className='mt-2 text-sm text-red-400'>
-                      {errors.zip.message}
-                    </p>
-                  )}
-                </div>
+                  <option value='10:00'>10:00</option>
+                  <option value='11:00'>11:00</option>
+                  <option value='12:00'>12:00</option>
+                </select>
+                {errors.hour && (
+                  <span className='text-sm text-red-600'>{errors.hour.message}</span>
+                )}
               </div>
             </div>
           </motion.div>
         )}
 
+        {/* Step 3 */}
         {currentStep === 2 && (
-          <>
+          <motion.div
+            initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Complete
+              Вашите данни
             </h2>
-            <p className='mt-1 text-sm leading-6 text-gray-600'>
-              Thank you for your submission.
-            </p>
-          </>
-        )}
-      </form>
+            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
+              <div className='sm:col-span-3'>
+                <label
+                  htmlFor='name'
+                  className='block text-sm font-medium leading-6 text-gray-900'
+                >
+                  Име
+                </label>
+                <input
+                  type='text'
+                  id='name'
+                  {...register('name')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                />
+                {errors.name && (
+                  <span className='text-sm text-red-600'>{errors.name.message}</span>
+                )}
+              </div>
 
-      {/* Navigation */}
-      <div className='mt-8 pt-5'>
-        <div className='flex justify-between'>
+              <div className='sm:col-span-3'>
+                <label
+                  htmlFor='phone'
+                  className='block text-sm font-medium leading-6 text-gray-900'
+                >
+                  Телефон
+                </label>
+                <input
+                  type='text'
+                  id='phone'
+                  {...register('phone')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                />
+                {errors.phone && (
+                  <span className='text-sm text-red-600'>{errors.phone.message}</span>
+                )}
+              </div>
+
+              <div className='sm:col-span-3'>
+                <label
+                  htmlFor='email'
+                  className='block text-sm font-medium leading-6 text-gray-900'
+                >
+                  Имейл
+                </label>
+                <input
+                  type='email'
+                  id='email'
+                  {...register('email')}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                />
+                {errors.email && (
+                  <span className='text-sm text-red-600'>{errors.email.message}</span>
+                )}
+              </div>
+
+              <div className='sm:col-span-6'>
+                <label
+                  htmlFor='note'
+                  className='block text-sm font-medium leading-6 text-gray-900'
+                >
+                  Бележка
+                </label>
+                <textarea
+                  id='note'
+                  {...register('note')}
+                  rows={3}
+                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                />
+                {errors.note && (
+                  <span className='text-sm text-red-600'>{errors.note.message}</span>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 4 */}
+        {currentStep === 3 && (
+          <motion.div
+            initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            <h2 className='text-base font-semibold leading-7 text-gray-900'>
+              Потвърждение
+            </h2>
+            <div className='mt-10'>
+              <p>
+                <strong>Локация:</strong> {watch('location')}
+              </p>
+              <p>
+                <strong>Бръснар:</strong> {watch('barber')}
+              </p>
+              <p>
+                <strong>Услуга:</strong> {watch('service')}
+              </p>
+              <p>
+                <strong>Дата:</strong> {watch('data')}
+              </p>
+              <p>
+                <strong>Час:</strong> {watch('hour')}
+              </p>
+              <p>
+                <strong>Име:</strong> {watch('name')}
+              </p>
+              <p>
+                <strong>Телефон:</strong> {watch('phone')}
+              </p>
+              <p>
+                <strong>Имейл:</strong> {watch('email')}
+              </p>
+              <p>
+                <strong>Бележка:</strong> {watch('note')}
+              </p>
+            </div>
+            <button
+              type='submit'
+              className='mt-6 w-full rounded bg-sky-600 py-2 text-white'
+            >
+              Потвърди
+            </button>
+          </motion.div>
+        )}
+
+        {/* Navigation buttons */}
+        <div className='mt-6 flex justify-between'>
           <button
             type='button'
+            className='rounded bg-gray-300 py-2 px-4 text-sm font-semibold text-gray-700'
             onClick={prev}
             disabled={currentStep === 0}
-            className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth='1.5'
-              stroke='currentColor'
-              className='h-6 w-6'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M15.75 19.5L8.25 12l7.5-7.5'
-              />
-            </svg>
+            Назад
           </button>
           <button
             type='button'
+            className='rounded bg-sky-600 py-2 px-4 text-sm font-semibold text-white'
             onClick={next}
-            disabled={currentStep === steps.length - 1}
-            className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth='1.5'
-              stroke='currentColor'
-              className='h-6 w-6'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M8.25 4.5l7.5 7.5-7.5 7.5'
-              />
-            </svg>
+            {currentStep === steps.length - 1 ? 'Потвърди' : 'Напред'}
           </button>
         </div>
-      </div>
+      </form>
     </section>
   )
 }
