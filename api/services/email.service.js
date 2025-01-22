@@ -4,13 +4,8 @@ const CryptoService = require('./crypto.service');
 const { COLLECTIONS } = require('../global');
 
 const EmailService = {
-    sendEmail: async (businessId, email, subject, message) => {
+    sendEmail: async (business, email, subject, message) => {
         try {
-            const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
-            if (!business || !business.isEmailSender) {
-                return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
-            }
-
             const decryptedPassword = CryptoService.unhash(business.senderPassword);
 
             const transporter = nodemailer.createTransport({

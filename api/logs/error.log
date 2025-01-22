@@ -43,3 +43,5 @@
 {"clientIp":"::1","dt":1737499790352,"level":"error","message":"errors.inactive"}
 {"clientIp":"::1","dt":1737499790833,"level":"error","message":"errors.inactive"}
 {"clientIp":"::1","dt":1737499791565,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1737560068384,"level":"error","message":"errors.not_found"}
+{"clientIp":"::1","dt":1737560315124,"level":"error","message":"errors.not_found"}

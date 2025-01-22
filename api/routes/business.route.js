@@ -37,15 +37,10 @@ router.post('/', adminAuthenticate, async (req, res, next) => {
     }
 });
 
-router.get('/:URLpostfix', async (req, res, next) => { 
-    if(!mongoose.Types.ObjectId.isValid(req.params.id)) 
-    {
-        return next(new ResponseError('errors.invalid_id', HTTP_STATUS_CODES.BAD_REQUEST));
-    }
+router.get('/:tld', async (req, res, next) => { 
     try
     {
-
-        const business = await DbService.getOne(COLLECTIONS.BUSINESSES, { URLpostfix: req.params.URLpostfix });
+        const business = await DbService.getOne(COLLECTIONS.BUSINESSES, { website: { "$regex": req.params.tld, "$options": 'i' } });
 
         if (!business || business.status === 'deleted') 
         {

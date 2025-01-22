@@ -14,7 +14,7 @@ const steps = [
   {
     id: 'Стъпка 1',
     name: 'Избиране на услуга',
-    fields: ['location', 'barber', 'service']
+    fields: ['location', 'employee', 'service']
   },
   {
     id: 'Стъпка 2',
@@ -24,7 +24,7 @@ const steps = [
   {
     id: 'Стъпка 3',
     name: 'Вашите данни',
-    fields: ['name', 'phone', 'email', 'note']
+    fields: ['name', 'phone', 'email']
   },
   {
     id: 'Стъпка 4',
@@ -36,6 +36,19 @@ const steps = [
 export default function Form() {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  
+  const [businessInfo, setBusinessInfo] = useState(null)
+  const [location, setLocation] = useState(null)
+  const [employee, setEmployee] = useState(null)
+  const [service, setService] = useState(null)
+
+  const [startDt, setStartDt] = useState(null)
+  const [endDt, setEndDt] = useState(null)
+
+  const [name, setName] = useState(null)
+  const [phone, setPhone] = useState(null)
+  const [email, setEmail] = useState(null)
+
   const delta = currentStep - previousStep
 
   const {
@@ -150,21 +163,21 @@ export default function Form() {
 
               <div className='sm:col-span-3'>
                 <label
-                  htmlFor='barber'
+                  htmlFor='employee'
                   className='block text-sm font-medium leading-6 text-gray-900'
                 >
                   Бръснар
                 </label>
                 <select
-                  id='barber'
-                  {...register('barber')}
+                  id='employee'
+                  {...register('employee')}
                   className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                 >
                   <option value='Бръснар 1'>Бръснар 1</option>
                   <option value='Бръснар 2'>Бръснар 2</option>
                 </select>
-                {errors.barber && (
-                  <span className='text-sm text-red-600'>{errors.barber.message}</span>
+                {errors.employee && (
+                  <span className='text-sm text-red-600'>{errors.employee.message}</span>
                 )}
               </div>
 
@@ -309,7 +322,7 @@ export default function Form() {
                 )}
               </div>
 
-              <div className='sm:col-span-6'>
+              {/*<div className='sm:col-span-6'>
                 <label
                   htmlFor='note'
                   className='block text-sm font-medium leading-6 text-gray-900'
@@ -325,7 +338,7 @@ export default function Form() {
                 {errors.note && (
                   <span className='text-sm text-red-600'>{errors.note.message}</span>
                 )}
-              </div>
+              </div>*/}
             </div>
           </motion.div>
         )}
@@ -345,7 +358,7 @@ export default function Form() {
                 <strong>Локация:</strong> {watch('location')}
               </p>
               <p>
-                <strong>Бръснар:</strong> {watch('barber')}
+                <strong>Бръснар:</strong> {watch('employee')}
               </p>
               <p>
                 <strong>Услуга:</strong> {watch('service')}
@@ -365,9 +378,9 @@ export default function Form() {
               <p>
                 <strong>Имейл:</strong> {watch('email')}
               </p>
-              <p>
+              {/*<p>
                 <strong>Бележка:</strong> {watch('note')}
-              </p>
+              </p>*/}
             </div>
             <button
               type='submit'

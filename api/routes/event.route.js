@@ -84,7 +84,7 @@ router.post('/', async (req, res, next) => {
             - Час: ${startDt.toLocaleTimeString()} - ${endDt.toLocaleTimeString()}
         `;
 
-        await EmailService.sendEmail(business._id, customerEmail, emailSubject, emailMessage);
+        await EmailService.sendEmail(business, customerEmail, emailSubject, emailMessage);
 
         return res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
     } catch(err) {
