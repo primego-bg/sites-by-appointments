@@ -6,7 +6,7 @@ const { COLLECTIONS } = require('../global');
 const EmailService = {
     sendEmail: async (business, email, subject, message) => {
         try {
-            const decryptedPassword = CryptoService.unhash(business.senderPassword);
+            //const decryptedPassword = CryptoService.unhash(business.senderPassword);
 
             const transporter = nodemailer.createTransport({
                 host: "smtp.gmail.com",

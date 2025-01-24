@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-import { z } from 'zod'
+import { set, z } from 'zod'
 import { FormDataSchema } from '@/lib/schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -33,23 +33,24 @@ const steps = [
   }
 ]
 
-export default function Form() {
+export default function Form(params: any) {
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
-  
-  const [businessInfo, setBusinessInfo] = useState(null)
-  const [location, setLocation] = useState(null)
-  const [employee, setEmployee] = useState(null)
-  const [service, setService] = useState(null)
 
-  const [startDt, setStartDt] = useState(null)
-  const [endDt, setEndDt] = useState(null)
+  const [location, setLocation] = useState<any>(null)
+  const [employee, setEmployee] = useState<any>(null)
+  const [service, setService] = useState<any>(null)
 
-  const [name, setName] = useState(null)
-  const [phone, setPhone] = useState(null)
-  const [email, setEmail] = useState(null)
+  const [startDt, setStartDt] = useState<any>(null)
+  const [endDt, setEndDt] = useState<any>(null)
+
+  const [name, setName] = useState<any>(null)
+  const [phone, setPhone] = useState<any>(null)
+  const [email, setEmail] = useState<any>(null)
 
   const delta = currentStep - previousStep
+
+  const business = params.business
 
   const {
     register,
@@ -137,69 +138,147 @@ export default function Form() {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
+            <h2 className="text-base font-semibold leading-7 text-gray-900">
               Избиране на услуга
             </h2>
-            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
-              <div className='sm:col-span-3'>
+            <div className="mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6">
+              {/* Location Selector */}
+              <div className="sm:col-span-3">
                 <label
-                  htmlFor='location'
-                  className='block text-sm font-medium leading-6 text-gray-900'
+                  htmlFor="location"
+                  className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Локация
                 </label>
                 <select
-                  id='location'
+                  id="location"
                   {...register('location')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  onChange={(e) => {
+                    const selectedLocation = e.target.value;
+                    setLocation(selectedLocation);
+                    setEmployee(null);
+                    setService(null);
+                  }}
+                  value={location || ''}
+                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value='Локация 1'>Локация 1</option>
-                  <option value='Локация 2'>Локация 2</option>
+                  <option value="">Изберете локация</option>
+                  {business.locations.map((location: any) => (
+                    <option key={location._id} value={location._id}>
+                      {location.name}
+                    </option>
+                  ))}
                 </select>
                 {errors.location && (
-                  <span className='text-sm text-red-600'>{errors.location.message}</span>
+                  <span className="text-sm text-red-600">{errors.location.message}</span>
                 )}
               </div>
 
-              <div className='sm:col-span-3'>
+              {/* Employee Selector */}
+              <div className="sm:col-span-3">
                 <label
-                  htmlFor='employee'
-                  className='block text-sm font-medium leading-6 text-gray-900'
+                  htmlFor="employee"
+                  className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Бръснар
                 </label>
                 <select
-                  id='employee'
+                  id="employee"
                   {...register('employee')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  onChange={(e) => {
+                    const selectedEmployee = e.target.value;
+                    setEmployee(selectedEmployee);
+                    setService(null);
+                    const employeeLocation = business.locations.find((loc: any) =>
+                      loc.employees.includes(selectedEmployee)
+                    )?._id;
+                    setLocation(employeeLocation);
+                  }}
+                  value={employee || ''}
+                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value='Бръснар 1'>Бръснар 1</option>
-                  <option value='Бръснар 2'>Бръснар 2</option>
+                  <option value="">Изберете бръснар</option>
+                  {location
+                    ? business.locations
+                  .find((loc: any) => loc._id === location)
+                  ?.employees.map((employeeId: any) => {
+                    const employee = business.employees.find(
+                      (emp: any) => emp._id === employeeId
+                    );
+                    return (
+                      <option key={employee._id} value={employee._id}>
+                        {employee.name}
+                      </option>
+                    );
+                  })
+                    : business.employees.map((employee: any) => (
+                  <option key={employee._id} value={employee._id}>
+                    {employee.name}
+                  </option>
+                      ))}
                 </select>
                 {errors.employee && (
-                  <span className='text-sm text-red-600'>{errors.employee.message}</span>
+                  <span className="text-sm text-red-600">{errors.employee.message}</span>
                 )}
               </div>
 
-              <div className='sm:col-span-3'>
+              {/* Service Selector */}
+                <div className="sm:col-span-3">
                 <label
-                  htmlFor='service'
-                  className='block text-sm font-medium leading-6 text-gray-900'
+                  htmlFor="service"
+                  className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Услуга
                 </label>
                 <select
-                  id='service'
+                  id="service"
                   {...register('service')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  onChange={(e) => {
+                  const selectedService = e.target.value;
+                  setService(selectedService);
+                  if (!selectedService) {
+                    setLocation(null);
+                    setEmployee(null);
+                  } else {
+                    const barberWithService = business.employees.find((emp: any) =>
+                    emp.services.includes(selectedService)
+                    );
+                    if (barberWithService) {
+                    setEmployee(barberWithService._id);
+                    const employeeLocation = business.locations.find((loc: any) =>
+                      loc.employees.includes(barberWithService._id)
+                    )?._id;
+                    setLocation(employeeLocation);
+                    }
+                  }
+                  }}
+                  value={service || ''}
+                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value='Услуга 1'>Услуга 1</option>
-                  <option value='Услуга 2'>Услуга 2</option>
+                  <option value="">Изберете услуга</option>
+                  {employee
+                  ? business.employees
+                    .find((emp: any) => emp._id === employee)
+                    ?.services.map((serviceId: any) => {
+                      const service = business.services.find(
+                      (srv: any) => srv._id === serviceId
+                      );
+                      return (
+                      <option key={service._id} value={service._id}>
+                        {service.name}
+                      </option>
+                      );
+                    })
+                  : business.services.map((service: any) => (
+                    <option key={service._id} value={service._id}>
+                      {service.name}
+                    </option>
+                    ))}
                 </select>
                 {errors.service && (
-                  <span className='text-sm text-red-600'>{errors.service.message}</span>
+                  <span className="text-sm text-red-600">{errors.service.message}</span>
                 )}
-              </div>
+                </div>
             </div>
           </motion.div>
         )}
@@ -214,44 +293,44 @@ export default function Form() {
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
               Избиране на дата и час
             </h2>
-            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='data'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Дата
-                </label>
-                <input
-                  type='date'
-                  id='data'
-                  {...register('data')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                />
-                {errors.data && (
-                  <span className='text-sm text-red-600'>{errors.data.message}</span>
-                )}
-              </div>
-
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='hour'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Час
-                </label>
-                <select
-                  id='hour'
-                  {...register('hour')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                >
-                  <option value='10:00'>10:00</option>
-                  <option value='11:00'>11:00</option>
-                  <option value='12:00'>12:00</option>
-                </select>
-                {errors.hour && (
-                  <span className='text-sm text-red-600'>{errors.hour.message}</span>
-                )}
+            <div className='mt-10'>
+              <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='date'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Дата
+                  </label>
+                  <input
+                    type='date'
+                    id='date'
+                    {...register('data')}
+                    onChange={(e) => setStartDt(e.target.value)}
+                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  />
+                  {errors.data && (
+                    <span className='text-sm text-red-600'>{errors.data.message}</span>
+                  )}
+                </div>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='time'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Час
+                  </label>
+                  <input
+                    type='time'
+                    id='time'
+                    {...register('hour')}
+                    onChange={(e) => setEndDt(e.target.value)}
+                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  />
+                  {errors.hour && (
+                    <span className='text-sm text-red-600'>{errors.hour.message}</span>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -267,78 +346,63 @@ export default function Form() {
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
               Вашите данни
             </h2>
-            <div className='mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6'>
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='name'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Име
-                </label>
-                <input
-                  type='text'
-                  id='name'
-                  {...register('name')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                />
-                {errors.name && (
-                  <span className='text-sm text-red-600'>{errors.name.message}</span>
-                )}
+            <div className='mt-10'>
+              <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='name'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Име
+                  </label>
+                  <input
+                    type='text'
+                    id='name'
+                    {...register('name')}
+                    onChange={(e) => setName(e.target.value)}
+                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  />
+                  {errors.name && (
+                    <span className='text-sm text-red-600'>{errors.name.message}</span>
+                  )}
+                </div>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='phone'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Телефон
+                  </label>
+                  <input
+                    type='tel'
+                    id='phone'
+                    {...register('phone')}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  />
+                  {errors.phone && (
+                    <span className='text-sm text-red-600'>{errors.phone.message}</span>
+                  )}
+                </div>
+                <div className='sm:col-span-1'>
+                  <label
+                    htmlFor='email'
+                    className='block text-sm font-medium leading-6 text-gray-900'
+                  >
+                    Имейл
+                  </label>
+                  <input
+                    type='email'
+                    id='email'
+                    {...register('email')}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                  />
+                  {errors.email && (
+                    <span className='text-sm text-red-600'>{errors.email.message}</span>
+                  )}
+                </div>
               </div>
-
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='phone'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Телефон
-                </label>
-                <input
-                  type='text'
-                  id='phone'
-                  {...register('phone')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                />
-                {errors.phone && (
-                  <span className='text-sm text-red-600'>{errors.phone.message}</span>
-                )}
-              </div>
-
-              <div className='sm:col-span-3'>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Имейл
-                </label>
-                <input
-                  type='email'
-                  id='email'
-                  {...register('email')}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                />
-                {errors.email && (
-                  <span className='text-sm text-red-600'>{errors.email.message}</span>
-                )}
-              </div>
-
-              {/*<div className='sm:col-span-6'>
-                <label
-                  htmlFor='note'
-                  className='block text-sm font-medium leading-6 text-gray-900'
-                >
-                  Бележка
-                </label>
-                <textarea
-                  id='note'
-                  {...register('note')}
-                  rows={3}
-                  className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                />
-                {errors.note && (
-                  <span className='text-sm text-red-600'>{errors.note.message}</span>
-                )}
-              </div>*/}
             </div>
           </motion.div>
         )}
@@ -355,28 +419,28 @@ export default function Form() {
             </h2>
             <div className='mt-10'>
               <p>
-                <strong>Локация:</strong> {watch('location')}
+                <strong>Локация:</strong> {business.locations.find((loc: any) => loc._id === location)?.name}
               </p>
               <p>
-                <strong>Бръснар:</strong> {watch('employee')}
+                <strong>Бръснар:</strong> {business.employees.find((emp: any) => emp._id === employee)?.name}
               </p>
               <p>
-                <strong>Услуга:</strong> {watch('service')}
+                <strong>Услуга:</strong> {business.services.find((srv: any) => srv._id === service)?.name}
               </p>
               <p>
-                <strong>Дата:</strong> {watch('data')}
+                <strong>Дата:</strong> {startDt}
               </p>
               <p>
-                <strong>Час:</strong> {watch('hour')}
+                <strong>Час:</strong> {endDt}
               </p>
               <p>
-                <strong>Име:</strong> {watch('name')}
+                <strong>Име:</strong> {name}
               </p>
               <p>
-                <strong>Телефон:</strong> {watch('phone')}
+                <strong>Телефон:</strong> {phone}
               </p>
               <p>
-                <strong>Имейл:</strong> {watch('email')}
+                <strong>Имейл:</strong> {email}
               </p>
               {/*<p>
                 <strong>Бележка:</strong> {watch('note')}

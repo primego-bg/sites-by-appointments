@@ -42,13 +42,9 @@ router.get('/:tld', async (req, res, next) => {
     {
         const business = await DbService.getOne(COLLECTIONS.BUSINESSES, { website: { "$regex": req.params.tld, "$options": 'i' } });
 
-        if (!business || business.status === 'deleted') 
-        {
-            return next(new ResponseError('errors.not_found', HTTP_STATUS_CODES.NOT_FOUND));
-        }
-        if(business.status !== 'active') {
-            return next(new ResponseError('errors.inactive', HTTP_STATUS_CODES.CONFLICT));
-        }
+        if (!business || business.status === 'deleted') return next(new ResponseError('errors.not_found', HTTP_STATUS_CODES.NOT_FOUND));
+        
+        if(business.status !== 'active') return next(new ResponseError('errors.inactive', HTTP_STATUS_CODES.CONFLICT));
 
         const businessInfo = {
             name: business.name,
@@ -59,7 +55,8 @@ router.get('/:tld', async (req, res, next) => {
             email: business.email,
             socialMedia: business.socialMedia,
             workingHours: business.workingHours,
-            availableCalendar: true
+            availableCalendar: true,
+            status: business.status
         };
 
         const services = await DbService.getMany(COLLECTIONS.SERVICES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
@@ -72,10 +69,10 @@ router.get('/:tld', async (req, res, next) => {
         businessInfo.employees = employees;
 
         const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(business._id) });
-        if(!calendar || calendar.status !== 'active') business.availableCalendar = false;
+        if(!calendar || calendar.status !== 'active') businessInfo.availableCalendar = false;
 
         return res.status(HTTP_STATUS_CODES.OK).send({
-            business
+            business: businessInfo
         });
     }
     catch (error)
