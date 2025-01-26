@@ -39,9 +39,9 @@ const EmailService = {
                         border: 1px solid #ddd; 
                         border-radius: 8px;
                     ">
-                        <p style="margin: 0 0 16px;">
-                            ${message}
-                        </p>
+                        <h4 style="margin: 0 0 16px;">
+                            <b>${message}</b>
+                        </h4>
                         <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
                         <p style="font-size: 0.9em; color: #666; margin: 0;">
                             Ако имате въпроси, свържете се с нас на: 
@@ -58,6 +58,10 @@ const EmailService = {
                             <strong>Поздрави,</strong>
                             <br>
                             Екипът на ${business.name}.
+                        </p>
+                        <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
+                        <p style="font-size: 0.8em; color: #999; text-align: left; margin: 16px 0 0;">
+                            Powered by <a href="https://sitezup.com" style="color: #007BFF; text-decoration: none;">sitezup.com</a>
                         </p>
                     </div>
                 `
