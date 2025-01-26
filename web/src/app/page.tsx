@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 import { useEffect, useState } from 'react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { BusinessHeader } from '@/components/BusinessHeader';
 
 export default function Home() {
  const [business, setBusiness] = useState<any>(null);
@@ -17,7 +18,6 @@ export default function Home() {
     const currentUrl = window.location.origin;
     const topLevelDomain = currentUrl.split('.').slice(-2).join('.');
     getBusiness(topLevelDomain).then(response => {
-      response.business.availableCalendar = false;
       setBusiness(response.business);
       setLoading(false);
     });
@@ -40,6 +40,7 @@ export default function Home() {
                     {
                       business.status === 'active'
                       ? <div>
+                          <BusinessHeader business={business} />
                           {
                             business.availableCalendar
                             ? <Form business={business} />
