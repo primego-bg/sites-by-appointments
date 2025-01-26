@@ -1,4 +1,4 @@
-const rootUrlApi = "http://localhost:2451";
+const rootUrlApi = "http://192.168.0.185:2451";
 
 async function getBusiness(topLevelDomain: string) {
     if(!topLevelDomain) {
