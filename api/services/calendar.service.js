@@ -214,7 +214,6 @@ const CalendarService = {
 
             // get events from calendars
             // TODO: events shall be got from now on
-            console.log(businessId, calendar._id, teamupSubCalendarId)
             const events = !teamupSubCalendarId
                 ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
                 : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId] } });

@@ -45,7 +45,6 @@ const TeamupService = {
         }
     },
     createEvent: async (teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, description, startDt, endDt, resultsSchema=null) => {
-        console.log(teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, description, startDt, endDt);
         try {
             // example of results schema
             // const resultsSchema = (event) => {

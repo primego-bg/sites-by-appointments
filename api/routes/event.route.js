@@ -67,7 +67,7 @@ router.post('/', async (req, res, next) => {
             calendar.teamupApiKey, 
             [employee.teamupSubCalendarId],
             `${req.body.name} - ${service.name}`,
-            `<p>Имейл: ${req.body.email}</p><p>Телефонен номер: ${req.body.phone}</p>`,
+            `<p><b>Имейл:</b> ${req.body.email}</p><p><b>Телефонен номер:</b> ${req.body.phone}</p>`,
             req.body.startDt,
             req.body.endDt,
         );
@@ -98,7 +98,6 @@ router.post('/', async (req, res, next) => {
 
         return;
     } catch(err) {
-        console.log(err);
         return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
