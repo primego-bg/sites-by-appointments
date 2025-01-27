@@ -8,7 +8,7 @@ const employeeSchema = mongoose.Schema({
         required: true
     },
     teamupSubCalendarId: {
-        type: String,
+        type: Number,
         required: false
     },
     businessId: {

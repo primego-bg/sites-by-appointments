@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
-import { getAvailableTimeSlots } from '@/utils/request'
+import { getAvailableTimeSlots, postEvent } from '@/utils/request'
 import { Calendar } from './Calendar';
 
 import moment from 'moment-timezone';
@@ -76,13 +76,15 @@ export default function Form(params: any) {
     if (!validateStep()) return;
 
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 1) {
-        await handleSubmit();
-      } else if (currentStep === 0) {
+      if (currentStep === 0) {
         await _getAvailableTimeSlots();
       }
       setPreviousStep(currentStep)
       setCurrentStep(step => step + 1)
+    }
+
+    if (currentStep === steps.length - 1) {
+      await handleSubmit();
     }
   }
 
@@ -111,7 +113,7 @@ export default function Form(params: any) {
         setTimeSlots(response);
       } catch (error: any) {
         toast({
-          title: "Error",
+          title: "Грешка",
           description: error.message,
           variant: "destructive"
         })
@@ -121,7 +123,57 @@ export default function Form(params: any) {
   }
 
   const handleSubmit = async () => {
+    console.log("vutre sum");
+    try {
+      const eventData = {
+        calendarId: business.calendar._id,
+        employeeId: employee,
+        serviceId: service,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        startDt,
+        endDt,
+        name,
+        email,
+        phone
+      }
+      console.log(eventData);
+      await postEvent(eventData);
+      
+      setOriginalState();
 
+      toast({
+        title: "✅ Успешно записан час!",
+        description: "Ще получите копие от резервацията на предоставения имейл",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Грешка",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  }
+
+  const setOriginalState = () => {
+    setPreviousStep(0);
+    setCurrentStep(0);
+
+    setLocation(null);
+    setEmployee(null);
+    setService(null);
+
+    setTimeSlots(null);
+    setStartDt(null);
+    setEndDt(null);
+    setStartDate(new Date());
+
+    setName(null);
+    setEmail(null);
+    setPhone(null);
+
+    setErrors({});
+
+    setShouldRefreshTimeSlots(false);
   }
 
   return (
@@ -458,10 +510,14 @@ export default function Form(params: any) {
                 <strong>Услуга:</strong> {business.services.find((srv: any) => srv._id === service)?.name}
               </p>
               <p>
-                <strong>Дата:</strong> {startDt}
+                <strong>Дата:</strong> {moment(startDt)
+        .tz(moment.tz.guess())
+        .format("DD/MM/YYYY")}
               </p>
               <p>
-                <strong>Час:</strong> {endDt}
+                <strong>Час:</strong> {moment(startDt)
+        .tz(moment.tz.guess())
+        .format("HH:mm")}
               </p>
               <p>
                 <strong>Име:</strong> {name}
@@ -476,12 +532,6 @@ export default function Form(params: any) {
                 <strong>Бележка:</strong> {watch('note')}
               </p>*/}
             </div>
-            <button
-              type='submit'
-              className='mt-6 w-full rounded bg-sky-600 py-2 text-white'
-            >
-              Потвърди
-            </button>
           </motion.div>
         )}
 

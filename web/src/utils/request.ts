@@ -55,14 +55,15 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
 
 async function postEvent(eventData: {
     calendarId: string;
-    teamupSubCalendarId: string;
+    employeeId: string;
     serviceId: string;
     startDt: string;
     endDt: string;
     name: string;
     email: string;
+    phone: string;
 }) {
-    if (!eventData.calendarId || !eventData.serviceId || !eventData.startDt || !eventData.endDt || !eventData.name || !eventData.email) {
+    if (!eventData.calendarId || !eventData.serviceId || !eventData.employeeId || !eventData.startDt || !eventData.endDt || !eventData.name || !eventData.email || !eventData.phone) {
         throw new Error("Invalid event data");
     }
 

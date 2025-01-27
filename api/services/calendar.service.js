@@ -214,12 +214,13 @@ const CalendarService = {
 
             // get events from calendars
             // TODO: events shall be got from now on
+            console.log(businessId, calendar._id, teamupSubCalendarId)
             const events = !teamupSubCalendarId
                 ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
                 : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId] } });
-            
+
             const availableTimeSlots = [];
-            const today = moment().tz(calendar.timezone).toISOString();
+            const today = moment().toISOString();
 
             // get all available time slots
             // iterate through each day from today to todayPlusMaxDays
@@ -271,8 +272,8 @@ const CalendarService = {
                     if (events) {
                         for (let j = 0; j < events.length; j++) {
                             const event = events[j];
-                            const eventStartDt = moment(event.start).tz(calendar.timezone).seconds(0).milliseconds(0).toISOString();
-                            const eventEndDt = moment(event.end).tz(calendar.timezone).seconds(0).milliseconds(0).toISOString();
+                            const eventStartDt = moment(event.start).seconds(0).milliseconds(0).toISOString();
+                            const eventEndDt = moment(event.end).seconds(0).milliseconds(0).toISOString();
             
                             if (
                                 !(moment(currentTime).isSame(eventEndDt, 'minute') || moment(endTime).isSame(eventStartDt, 'minute'))
@@ -315,12 +316,9 @@ const CalendarService = {
             const business = await DbService.getById(COLLECTIONS.BUSINESSES, calendar.businessId);
             if(!business) return null;
 
-            // get availableTimeSlots and check if startDt and endDt match any of the available time slots
-            // the duration is endDt - startDt in minutes / business.slotTime
-            const businessSlotTime = business.slotTime;
-            const timeSlotsDuration = moment(endDt).diff(moment(startDt), 'minutes') / businessSlotTime;
+            const timeSlotsDuration = moment(endDt).diff(moment(startDt), 'minutes');
             const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(calendar.businessId, timeSlotsDuration, teamupSubCalendarId);
-            if(!availableTimeSlots) return null;
+            if(!availableTimeSlots || availableTimeSlots.length == 0) return null;
 
             let isTimeSlotValid = false;
             for(let i = 0; i < availableTimeSlots.length; i++) {

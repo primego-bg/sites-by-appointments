@@ -44,7 +44,8 @@ const TeamupService = {
             return null;
         }
     },
-    createEvent: async (teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, startDt, endDt, resultsSchema=null) => {
+    createEvent: async (teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, description, startDt, endDt, resultsSchema=null) => {
+        console.log(teamupSecretCalendarKey, teamupApiKey, subcalendarIds, title, description, startDt, endDt);
         try {
             // example of results schema
             // const resultsSchema = (event) => {
@@ -56,11 +57,12 @@ const TeamupService = {
             //     };
             // };
 
-            const response = await axios.post(`https://api.teamup.com/${teamupSecretCalendarKey}/events`, {
+            const response = await axios.post(`https://api.teamup.com/${teamupSecretCalendarKey}/events?inputFormat=html`, {
                 subcalendar_ids: subcalendarIds,
                 title,
                 start_dt: startDt,
                 end_dt: endDt,
+                notes: description
             }, {
                 headers: {
                     'Teamup-Token': teamupApiKey
@@ -73,7 +75,7 @@ const TeamupService = {
 
             return resultsSchema(response.data.event);
         } catch (error) {
-            console.error(error);
+            console.error(error.response.data.error);
             return null;
         }
     },

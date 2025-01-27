@@ -115,7 +115,13 @@ const eventPostValidation = (data) => {
             }
             return value;
         }).required(),
-        teamupSubCalendarId: Joi.string().required(),
+        employeeId: Joi.string().custom((value, helpers) => {
+            if (!mongoose.Types.ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        }).required(),
+        timezone: timezoneValidation,
         // iso strings
         startDt: Joi.date().required(),
         endDt: Joi.date().required(),
@@ -127,7 +133,7 @@ const eventPostValidation = (data) => {
         }).required(),
         name: Joi.string().min(3).max(100).required(),
         email: Joi.string().email().required(),
-        phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
+        phone: Joi.string().required(),
     });
 
     return schema.validate(data);

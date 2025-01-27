@@ -23,7 +23,7 @@ export default function Home() {
       setBusiness(response.business);
     }).catch(error => {
       toast({
-        title: "Error",
+        title: "Грешка",
         description: error.message,
         variant: "destructive"
       })

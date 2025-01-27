@@ -2,16 +2,20 @@ const express = require('express');
 const { HTTP_STATUS_CODES, DATABASE_MODELS, COLLECTIONS } = require('../global');
 const { default: mongoose } = require('mongoose');
 const router = express.Router();
+const moment = require("moment-timezone");
 const DbService = require('../services/db.service');
 const CalendarService = require('../services/calendar.service');
 const ResponseError = require('../errors/responseError');
+const { eventPostValidation } = require('../validation/hapi');
+const TeamupService = require('../services/teamup.service');
+const EmailService = require('../services/email.service');
 
 router.post('/', async (req, res, next) => {
     const { error } = eventPostValidation(req.body);
     if(error) return next(new ResponseError(error.details[0].message, HTTP_STATUS_CODES.BAD_REQUEST));
 
     try {
-        const calendar = await DbService.getOne(DATABASE_MODELS.CALENDAR, { _id: new mongoose.Types.ObjectId(req.body.calendarId) });
+        const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { _id: new mongoose.Types.ObjectId(req.body.calendarId) });
         if(!calendar) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(calendar.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(calendar.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
@@ -27,49 +31,53 @@ router.post('/', async (req, res, next) => {
         if(service.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(service.businessId.toString() !== calendar.businessId.toString()) return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
 
-        const employee = await DbService.getOne(COLLECTIONS.EMPLOYEES, { teamupSubCalendarId: req.body.teamupSubCalendarId });
+        const employee = await DbService.getById(COLLECTIONS.EMPLOYEES, req.body.employeeId);
         if(!employee) return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(employee.status !== 'active') return next(new ResponseError("errors.inactive", HTTP_STATUS_CODES.CONFLICT));
         if(employee.status === 'deleted') return next(new ResponseError("errors.not_found", HTTP_STATUS_CODES.NOT_FOUND));
         if(employee.businessId.toString() !== calendar.businessId.toString()) return next(new ResponseError("errors.invalid_business", HTTP_STATUS_CODES.CONFLICT));
 
-        if(!employee.services.includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
+        if(!employee.services.map((_id) => {return _id.toString()}).includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
 
         // compare the duration in minutes of service.timeSlots with the difference between startDt and endDt. keep in mind that business.slotTime is the minutes duration for one slot
         const serviceDuration = service.timeSlots * business.slotTime;
         const startDt = new Date(req.body.startDt);
         const endDt = new Date(req.body.endDt);
-        const duration = endDt.getTime() - startDt.getTime();
+        const duration = (endDt.getTime() - startDt.getTime()) / 60000;
         if(duration !== serviceDuration) return next(new ResponseError("errors.invalid_duration", HTTP_STATUS_CODES.CONFLICT));
 
-        // utilize recent calendar service functions to check the validity of the request
-        // and to create the event in the calendar
 
-        const isTimeSlotAvailableAndValid = await CalendarService.checkTimeSlotValidityAndAvailability(calendar._id, req.body.startDt, req.body.endDt, req.body.teamupSubCalendarId);
+        const isTimeSlotAvailableAndValid = await CalendarService.checkTimeSlotValidityAndAvailability(calendar._id, req.body.startDt, req.body.endDt, employee.teamupSubCalendarId);
         if(!isTimeSlotAvailableAndValid) return next(new ResponseError("errors.invalid_time_slot_or_unavailable", HTTP_STATUS_CODES.CONFLICT));
 
-        const newEvent = new Event({
+        req.body.startDt = moment(req.body.startDt).tz(req.body.timezone).format("YYYY-MM-DDTHH:mm:ssZ"); 
+        req.body.endDt = moment(req.body.endDt).tz(req.body.timezone).format("YYYY-MM-DDTHH:mm:ssZ");
+
+        const newEvent = {
             calendarId: calendar._id,
-            teamupSubCalendarIds: [req.body.teamupSubCalendarId],
+            teamupSubCalendarIds: [employee.teamupSubCalendarId],
             start: req.body.startDt,
             end: req.body.endDt,
             allDay: false,
-        });
+        };
         
         // teamup service create event
         const teamupEvent = await TeamupService.createEvent(
             calendar.teamupSecretCalendarKey, 
             calendar.teamupApiKey, 
-            newEvent.teamupSubCalendarIds,
+            [employee.teamupSubCalendarId],
             `${req.body.name} - ${service.name}`,
-            newEvent.start,
-            newEvent.end
+            `<p>Имейл: ${req.body.email}</p><p>Телефонен номер: ${req.body.phone}</p>`,
+            req.body.startDt,
+            req.body.endDt,
         );
         if(!teamupEvent) return next(new ResponseError("errors.teamup_event_creation_failed", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
 
         // create event in db
         newEvent.teamupEventId = teamupEvent.id;
         await DbService.create(COLLECTIONS.EVENTS, newEvent);
+
+        res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
 
         // send email to customer
         const customerEmail = req.body.email;
@@ -80,14 +88,17 @@ router.post('/', async (req, res, next) => {
             Потвърждение за вашия час:
             
             - Услуга: ${service.name}
-            - Дата: ${startDt.toDateString()}
-            - Час: ${startDt.toLocaleTimeString()} - ${endDt.toLocaleTimeString()}
+            - Кой: ${employee.name}
+            - Дата: ${moment(startDt).tz(req.body.timezone).format("YYYY-MM-DD")}
+            - Час: ${moment(startDt).tz(req.body.timezone).format("HH:mm")}
+            - Продължителност: ${duration} ${duration == 1 ? 'минута': 'минути'}
         `;
 
         await EmailService.sendEmail(business, customerEmail, emailSubject, emailMessage);
 
-        return res.status(HTTP_STATUS_CODES.CREATED).send(newEvent);
+        return;
     } catch(err) {
+        console.log(err);
         return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }
 });
