@@ -36,18 +36,16 @@ export default function Form(params: any) {
   const [service, setService] = useState<any>(null)
 
   const [timeSlots, setTimeSlots] = useState<any>(null)
-
   const [startDt, setStartDt] = useState<any>(null)
   const [endDt, setEndDt] = useState<any>(null)
+  // start date used in calendar component
+  const [startDate, setStartDate] = useState<any>(new Date())
 
   const [name, setName] = useState<any>(null)
   const [phone, setPhone] = useState<any>(null)
   const [email, setEmail] = useState<any>(null)
 
   const [errors, setErrors] = useState<any>({});
-
-  // start date used in calendar component
-  const [startDate, setStartDate] = useState<any>(new Date());
 
   const delta = currentStep - previousStep
 
@@ -86,8 +84,19 @@ export default function Form(params: any) {
 
   const prev = () => {
     if (currentStep > 0) {
+      let temp = currentStep;
       setPreviousStep(currentStep)
       setCurrentStep(step => step - 1)
+      triggerValueReset(temp)
+    }
+  }
+
+  const triggerValueReset = (step: number) => {
+    if (step <= 1) {
+      setStartDt(null);
+      setEndDt(null);
+      setTimeSlots(null);
+      setStartDate(new Date());
     }
   }
 
@@ -95,7 +104,6 @@ export default function Form(params: any) {
     const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
     const timezone = business.calendar.timezone;
 
-    console.log(response);
     setTimeSlots(response);
     //TODO: TOast if error and return to previous step
   }
@@ -166,6 +174,7 @@ export default function Form(params: any) {
                     setEmployee(null);
                     setService(null);
                     setErrors({ ...errors, location: null, employee: null, service: null });
+                    triggerValueReset(0);
                   }}
                   value={location || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
@@ -201,6 +210,7 @@ export default function Form(params: any) {
                     )?._id;
                     setLocation(employeeLocation);
                     setErrors({ ...errors, employee: null, service: null, location: null });
+                    triggerValueReset(0);
                   }}
                   value={employee || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
@@ -259,6 +269,7 @@ export default function Form(params: any) {
                       }
                     }
                     setErrors({ ...errors, service: null, employee: null, location: null });
+                    triggerValueReset(0);
                   }}
                   value={service || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
@@ -307,7 +318,6 @@ export default function Form(params: any) {
                 selected={startDate}
                 setSelected={setStartDate}
                 business={params.business} />
-                {new Date(startDate).toString()}
                 {
                   startDate
                   ?
@@ -342,8 +352,6 @@ export default function Form(params: any) {
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
               Вашите данни
             </h2>
-            {new Date(startDt).toString()}
-            {new Date(endDt).toString()}
             <div className='mt-10'>
               <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
                 <div className='sm:col-span-1'>
@@ -455,7 +463,9 @@ export default function Form(params: any) {
 
         {/* Navigation buttons */}
         <div className='mt-6 flex justify-between'>
-          <button
+          {
+            currentStep !== 0
+            ? <button
             type='button'
             className='rounded bg-gray-300 py-2 px-4 text-sm font-semibold text-gray-700'
             onClick={prev}
@@ -463,6 +473,8 @@ export default function Form(params: any) {
           >
             Назад
           </button>
+          : null
+          }
           <button
             type='button'
             className='rounded bg-sky-600 py-2 px-4 text-sm font-semibold text-white'

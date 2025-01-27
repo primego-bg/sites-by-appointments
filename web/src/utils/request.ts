@@ -20,9 +20,8 @@ async function getBusiness(topLevelDomain: string) {
       }
   
       const json = await response.json();
-      console.log(json);
 
-        return json;
+      return json;
     } catch (error: any) {
       console.error(error.message);
     }
