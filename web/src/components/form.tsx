@@ -7,6 +7,8 @@ import { getAvailableTimeSlots } from '@/utils/request'
 import { Calendar } from './Calendar';
 
 import moment from 'moment-timezone';
+import { useToast } from '@/hooks/use-toast';
+import { LoadingSpinner } from './LoadingSpinner';
 
 const steps = [
   {
@@ -28,6 +30,8 @@ const steps = [
 ]
 
 export default function Form(params: any) {
+  const { toast } = useToast();
+
   const [previousStep, setPreviousStep] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -54,8 +58,6 @@ export default function Form(params: any) {
   const business = params.business
 
   const next = async () => {
-    let hasError = false;
-
     const validateStep = () => {
       let errors: any = {};
       if (currentStep === 0) {
@@ -104,11 +106,22 @@ export default function Form(params: any) {
 
   const _getAvailableTimeSlots = async () => {
     if(shouldRefreshTimeSlots) {
-      const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
-      const timezone = business.calendar.timezone;
-
-      setTimeSlots(response);
+      try {
+        const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
+        setTimeSlots(response);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        })
+        prev();
+      }
     }
+  }
+
+  const handleSubmit = async () => {
+
   }
 
   return (
@@ -315,35 +328,41 @@ export default function Form(params: any) {
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
               Избиране на дата и час
             </h2>
-            <div className='mt-10'>
-              <Calendar
-                timeSlots={timeSlots}
-                selected={startDate}
-                setSelected={setStartDate}
-                business={params.business}
-                setStartDt={setStartDt}
-                setEndDt={setEndDt} />
-                {
-                  startDate
-                  ?
-                  <div className='mt-6 grid grid-cols-2 gap-4'>
-                    {timeSlots.filter((slot: any) => new Date(slot.start).toISOString().startsWith(new Date(startDate).toISOString().split('T')[0])).map((slot: any) => (
-                      <button
-                        key={slot.start + slot.end + Math.random().toString()}
-                        onClick={() => {                          
-                          setStartDt(slot.start);
-                          setEndDt(slot.end);
-                          next();
-                        }}
-                        className={`rounded bg-gray-300 py-2 text-gray-700`}
-                      >
-                        {moment(slot.start).format('HH:mm')}
-                      </button>
-                    ))}
-                  </div>
-                  : null
-                }
-            </div>
+            {
+              timeSlots && timeSlots.length > 0
+              ? <div className='mt-10'>
+                  <Calendar
+                    timeSlots={timeSlots}
+                    selected={startDate}
+                    setSelected={setStartDate}
+                    business={params.business}
+                    setStartDt={setStartDt}
+                    setEndDt={setEndDt} />
+                    {
+                      startDate
+                      ? 
+                      <div className='mt-6 grid grid-cols-2 gap-4'>
+                          {timeSlots.filter((slot: any) => new Date(slot.start).toISOString().startsWith(new Date(startDate).toISOString().split('T')[0])).map((slot: any) => (
+                            <button
+                              key={slot.start + slot.end + Math.random().toString()}
+                              onClick={() => {                          
+                                setStartDt(slot.start);
+                                setEndDt(slot.end);
+                                next();
+                              }}
+                              className={`rounded bg-gray-300 py-2 text-gray-700`}
+                            >
+                              {moment(slot.start).format('HH:mm')}
+                            </button>
+                          ))}
+                        </div>
+                      : null
+                    }
+                </div>
+              : <div className="flex flex-row space-x-2 items-center mt-4">
+                  <p className='text-zinc-800'>Няма намерени свободни часове за записване</p>
+              </div>
+            }
           </motion.div>
         )}
 

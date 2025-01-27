@@ -1,17 +1,19 @@
 'use client';
 
 import Form from '@/components/form'
-import { getAvailableTimeSlots, getBusiness, postEvent } from '@/utils/request';
-import { Skeleton } from "@/components/ui/skeleton"
+import { getBusiness } from '@/utils/request';
 
 import { useEffect, useState } from 'react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { BusinessHeader } from '@/components/BusinessHeader';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
+
+ const { toast } = useToast();
+
  const [business, setBusiness] = useState<any>(null);
  const [loading, setLoading] = useState<boolean>(false);
- const [availableTimeSlots, setAvailableTimeSlots] = useState<any>(null)
  
  useEffect(() => {
     setLoading(true);
@@ -19,13 +21,15 @@ export default function Home() {
     const topLevelDomain = currentUrl.split('.').slice(-2).join('.');
     getBusiness(topLevelDomain).then(response => {
       setBusiness(response.business);
+    }).catch(error => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    }).finally(() => {
       setLoading(false);
     });
-    
-    /*getAvailableTimeSlots('679021c44aeb1686eec0dc5a', '679021c44aeb1686eec0dc5a', '679021c44aeb1686eec0dc5a').then(response => {
-      setAvailableTimeSlots(response.events);
-    });*/
-
   }, []);
 
   return (
@@ -64,12 +68,11 @@ export default function Home() {
                     }
                   </div>
                   : <div className="flex flex-row space-x-2 items-center justify-center">
-                    <LoadingSpinner className="text-zinc-500" />
-                    <p className='text-zinc-800'>Зареждане</p>
+                    <p className='text-zinc-800 mt-4'>Бизнесът не беше намерен</p>
                 </div>
                 }
               </>
-          : <div className="flex flex-row space-x-2 items-center justify-center">
+          : <div className="flex flex-row space-x-2 items-center justify-center mt-4">
             <LoadingSpinner className="text-zinc-500" />
             <p className='text-zinc-800'>Зареждане</p>
         </div>
