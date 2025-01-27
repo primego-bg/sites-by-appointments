@@ -109,7 +109,6 @@ export default function Form(params: any) {
 
       setTimeSlots(response);
     }
-    //TODO: TOast if error and return to previous step
   }
 
   return (
@@ -321,7 +320,9 @@ export default function Form(params: any) {
                 timeSlots={timeSlots}
                 selected={startDate}
                 setSelected={setStartDate}
-                business={params.business} />
+                business={params.business}
+                setStartDt={setStartDt}
+                setEndDt={setEndDt} />
                 {
                   startDate
                   ?
@@ -334,7 +335,7 @@ export default function Form(params: any) {
                           setEndDt(slot.end);
                           next();
                         }}
-                        className='rounded bg-gray-300 py-2 text-gray-700'
+                        className={`rounded bg-gray-300 py-2 text-gray-700`}
                       >
                         {moment(slot.start).format('HH:mm')}
                       </button>

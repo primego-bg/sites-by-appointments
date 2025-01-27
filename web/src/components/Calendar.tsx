@@ -48,6 +48,8 @@ export function Calendar(params: any) {
             onSelect={(date: any) => {
                 const pickedDateString = date.toISOString().split("T")[0];
                 params.setSelected(pickedDateString)
+                params.setStartDt(null);
+                params.setEndDt(null);
             }}
             startMonth={calendarStartDate}
             endMonth={calendarEndDate}

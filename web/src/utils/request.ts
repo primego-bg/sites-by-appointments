@@ -34,18 +34,13 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
 
   const url = `${rootUrlApi}/event/available?calendarId=${calendarId}&employeeId=${employeeId}&serviceId=${serviceId}`;
 
-  try {
-      const response = await fetch(url);
-      if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
-      }
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+    }
 
-      const availableTimeSlots = await response.json();
-      return availableTimeSlots;
-  } catch (error: any) {
-      console.error(error.message);
-      throw new Error('Failed to fetch available time slots');
-  }
+    const availableTimeSlots = await response.json();
+    return availableTimeSlots;
 }
 
 async function postEvent(eventData: {
