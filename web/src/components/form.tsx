@@ -3,37 +3,27 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-import { set, z } from 'zod'
-import { FormDataSchema } from '@/lib/schema'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, SubmitHandler } from 'react-hook-form'
 import { getAvailableTimeSlots } from '@/utils/request'
-import { Calendar } from './Calendar'
+import { Calendar } from './Calendar';
 
-const moment = require('moment-timezone');
-
-type Inputs = z.infer<typeof FormDataSchema>
+import moment from 'moment-timezone';
 
 const steps = [
   {
     id: 'Стъпка 1',
     name: 'Избор на услуга',
-    fields: ['location', 'employee', 'service']
   },
   {
     id: 'Стъпка 2',
     name: 'Избор на дата и час',
-    fields: ['date', 'hour']
   },
   {
     id: 'Стъпка 3',
     name: 'Контактни данни',
-    fields: ['name', 'phone', 'email']
   },
   {
     id: 'Стъпка 4',
     name: 'Потвърждение',
-    fields: ['confirm']
   }
 ]
 
@@ -54,6 +44,8 @@ export default function Form(params: any) {
   const [phone, setPhone] = useState<any>(null)
   const [email, setEmail] = useState<any>(null)
 
+  const [errors, setErrors] = useState<any>({});
+
   // start date used in calendar component
   const [startDate, setStartDate] = useState<any>(new Date());
 
@@ -61,33 +53,29 @@ export default function Form(params: any) {
 
   const business = params.business
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    reset,
-    trigger,
-    formState: { errors }
-  } = useForm<Inputs>({
-    resolver: zodResolver(FormDataSchema)
-  })
-
-  const processForm: SubmitHandler<Inputs> = data => {
-    console.log(data)
-    reset()
-  }
-
-  type FieldName = keyof Inputs
-
   const next = async () => {
-    const fields = steps[currentStep].fields
-    const output = await trigger(fields as FieldName[], { shouldFocus: true })
+    let hasError = false;
 
-    if (!output && currentStep != 1) return
+    const validateStep = () => {
+      let errors: any = {};
+      if (currentStep === 0) {
+      if (!location) errors.location = 'Изберете локация';
+      if (!employee) errors.employee = 'Изберете бръснар';
+      if (!service) errors.service = 'Изберете услуга';
+      } else if (currentStep === 2) {
+      if (!name) errors.name = 'Името е задължително';
+      if (!phone) errors.phone = 'Телефонният номер е задължителен';
+      if (!email) errors.email = 'Имейлът е задължителен';
+      }
+      setErrors(errors);
+      return Object.keys(errors).length === 0;
+    };
+
+    if (!validateStep()) return;
 
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
-        await handleSubmit(processForm)()
+      if (currentStep === steps.length - 1) {
+        await handleSubmit();
       } else if (currentStep === 0) {
         await _getAvailableTimeSlots();
       }
@@ -150,7 +138,7 @@ export default function Form(params: any) {
       </nav>
 
       {/* Form */}
-      <form className='mt-12 py-12' onSubmit={handleSubmit(processForm)}>
+      <form className='mt-12 py-12'>
         {/* Step 1 */}
         {currentStep === 0 && (
           <motion.div
@@ -172,17 +160,17 @@ export default function Form(params: any) {
                 </label>
                 <select
                   id="location"
-                  {...register('location')}
                   onChange={(e) => {
                     const selectedLocation = e.target.value;
                     setLocation(selectedLocation);
                     setEmployee(null);
                     setService(null);
+                    setErrors({ ...errors, location: null, employee: null, service: null });
                   }}
                   value={location || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value="">Изберете локация</option>
+                  {!location ? <option value="">Изберете локация</option> : null}
                   {business.locations.map((location: any) => (
                     <option key={location._id} value={location._id}>
                       {location.name}
@@ -190,7 +178,7 @@ export default function Form(params: any) {
                   ))}
                 </select>
                 {errors.location && (
-                  <span className="text-sm text-red-600">{errors.location.message}</span>
+                  <span className="text-sm text-red-600">{errors.location}</span>
                 )}
               </div>
 
@@ -204,7 +192,6 @@ export default function Form(params: any) {
                 </label>
                 <select
                   id="employee"
-                  {...register('employee')}
                   onChange={(e) => {
                     const selectedEmployee = e.target.value;
                     setEmployee(selectedEmployee);
@@ -213,11 +200,12 @@ export default function Form(params: any) {
                       loc.employees.includes(selectedEmployee)
                     )?._id;
                     setLocation(employeeLocation);
+                    setErrors({ ...errors, employee: null, service: null, location: null });
                   }}
                   value={employee || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value="">Изберете бръснар</option>
+                  {!employee ? <option value="">Изберете бръснар</option> : null}
                   {location
                     ? business.locations
                   .find((loc: any) => loc._id === location)
@@ -238,7 +226,7 @@ export default function Form(params: any) {
                       ))}
                 </select>
                 {errors.employee && (
-                  <span className="text-sm text-red-600">{errors.employee.message}</span>
+                  <span className="text-sm text-red-600">{errors.employee}</span>
                 )}
               </div>
 
@@ -252,30 +240,30 @@ export default function Form(params: any) {
                 </label>
                 <select
                   id="service"
-                  {...register('service')}
                   onChange={(e) => {
-                  const selectedService = e.target.value;
-                  setService(selectedService);
-                  if (!selectedService) {
-                    setLocation(null);
-                    setEmployee(null);
-                  } else {
-                    const barberWithService = business.employees.find((emp: any) =>
-                    emp.services.includes(selectedService)
-                    );
-                    if (barberWithService) {
-                    setEmployee(barberWithService._id);
-                    const employeeLocation = business.locations.find((loc: any) =>
-                      loc.employees.includes(barberWithService._id)
-                    )?._id;
-                    setLocation(employeeLocation);
+                    const selectedService = e.target.value;
+                    setService(selectedService);
+                    if (!selectedService) {
+                      setLocation(null);
+                      setEmployee(null);
+                    } else {
+                      const barberWithService = business.employees.find((emp: any) =>
+                      emp.services.includes(selectedService)
+                      );
+                      if (barberWithService) {
+                      setEmployee(barberWithService._id);
+                      const employeeLocation = business.locations.find((loc: any) =>
+                        loc.employees.includes(barberWithService._id)
+                      )?._id;
+                      setLocation(employeeLocation);
+                      }
                     }
-                  }
+                    setErrors({ ...errors, service: null, employee: null, location: null });
                   }}
                   value={service || ''}
                   className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
-                  <option value="">Изберете услуга</option>
+                  {!service ? <option value="">Изберете услуга</option> : null}
                   {employee
                   ? business.employees
                     .find((emp: any) => emp._id === employee)
@@ -296,7 +284,7 @@ export default function Form(params: any) {
                     ))}
                 </select>
                 {errors.service && (
-                  <span className="text-sm text-red-600">{errors.service.message}</span>
+                  <span className="text-sm text-red-600">{errors.service}</span>
                 )}
                 </div>
             </div>
@@ -368,12 +356,12 @@ export default function Form(params: any) {
                   <input
                     type='text'
                     id='name'
-                    {...register('name')}
-                    onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    onChange={(e) => {setName(e.target.value); setErrors({ ...errors, name: null })}}
                     className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.name && (
-                    <span className='text-sm text-red-600'>{errors.name.message}</span>
+                    <span className='text-sm text-red-600'>{errors.name}</span>
                   )}
                 </div>
                 <div className='sm:col-span-1'>
@@ -386,12 +374,12 @@ export default function Form(params: any) {
                   <input
                     type='tel'
                     id='phone'
-                    {...register('phone')}
-                    onChange={(e) => setPhone(e.target.value)}
+                    value={phone}
+                    onChange={(e) => {setPhone(e.target.value); setErrors({ ...errors, phone: null })}}
                     className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.phone && (
-                    <span className='text-sm text-red-600'>{errors.phone.message}</span>
+                    <span className='text-sm text-red-600'>{errors.phone}</span>
                   )}
                 </div>
                 <div className='sm:col-span-1'>
@@ -404,12 +392,12 @@ export default function Form(params: any) {
                   <input
                     type='email'
                     id='email'
-                    {...register('email')}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    onChange={(e) => {setEmail(e.target.value); setErrors({ ...errors, email: null })}}
                     className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.email && (
-                    <span className='text-sm text-red-600'>{errors.email.message}</span>
+                    <span className='text-sm text-red-600'>{errors.email}</span>
                   )}
                 </div>
               </div>
