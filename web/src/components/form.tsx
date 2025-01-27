@@ -47,6 +47,8 @@ export default function Form(params: any) {
 
   const [errors, setErrors] = useState<any>({});
 
+  const [shouldRefreshTimeSlots, setShouldRefreshTimeSlots] = useState(false);
+
   const delta = currentStep - previousStep
 
   const business = params.business
@@ -83,28 +85,30 @@ export default function Form(params: any) {
   }
 
   const prev = () => {
+    let temp = currentStep;
     if (currentStep > 0) {
-      let temp = currentStep;
       setPreviousStep(currentStep)
       setCurrentStep(step => step - 1)
       triggerValueReset(temp)
     }
+    if(temp === 1) {
+      setShouldRefreshTimeSlots(false);
+    }
   }
 
   const triggerValueReset = (step: number) => {
-    if (step <= 1) {
-      setStartDt(null);
-      setEndDt(null);
-      setTimeSlots(null);
-      setStartDate(new Date());
+    if(step === 0) {
+      setShouldRefreshTimeSlots(true);
     }
   }
 
   const _getAvailableTimeSlots = async () => {
-    const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
-    const timezone = business.calendar.timezone;
+    if(shouldRefreshTimeSlots) {
+      const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
+      const timezone = business.calendar.timezone;
 
-    setTimeSlots(response);
+      setTimeSlots(response);
+    }
     //TODO: TOast if error and return to previous step
   }
 
