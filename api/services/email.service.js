@@ -1,20 +1,18 @@
 const nodemailer = require('nodemailer');
-const DbService = require('./db.service');
 const CryptoService = require('./crypto.service'); 
-const { COLLECTIONS } = require('../global');
 
 const EmailService = {
     sendEmail: async (business, email, subject, message) => {
         try {
-            //const decryptedPassword = CryptoService.unhash(business.senderPassword);
+            const decryptedPassword = CryptoService.unhash(business.senderPassword);
 
             const transporter = nodemailer.createTransport({
                 host: "smtp.gmail.com",
                 port: 587,
                 secure: false,
                 auth: {
-                    user: "primego.bg@gmail.com", //business.senderEmail
-                    pass: "ngmgokzpngcokanu", //decryptedPassword
+                    user: business.senderEmail, //"primego.bg@gmail.com"
+                    pass: decryptedPassword, //"ngmgokzpngcokanu"
                 },
                 tls: {
                     rejectUnauthorized: true,
