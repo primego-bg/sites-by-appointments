@@ -7,6 +7,10 @@ import { set, z } from 'zod'
 import { FormDataSchema } from '@/lib/schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { getAvailableTimeSlots } from '@/utils/request'
+import { Calendar } from './Calendar'
+
+const moment = require('moment-timezone');
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -41,12 +45,18 @@ export default function Form(params: any) {
   const [employee, setEmployee] = useState<any>(null)
   const [service, setService] = useState<any>(null)
 
+  const [timeSlots, setTimeSlots] = useState<any>(null)
+
   const [startDt, setStartDt] = useState<any>(null)
   const [endDt, setEndDt] = useState<any>(null)
 
   const [name, setName] = useState<any>(null)
   const [phone, setPhone] = useState<any>(null)
   const [email, setEmail] = useState<any>(null)
+
+  // start date used in calendar component
+  const [startDate, setStartDate] = useState<any>(new Date());
+  const [startTime, setStartTime] = useState<any>(null);
 
   const delta = currentStep - previousStep
 
@@ -79,6 +89,8 @@ export default function Form(params: any) {
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
         await handleSubmit(processForm)()
+      } else if (currentStep === 0) {
+        await _getAvailableTimeSlots();
       }
       setPreviousStep(currentStep)
       setCurrentStep(step => step + 1)
@@ -92,8 +104,17 @@ export default function Form(params: any) {
     }
   }
 
+  const _getAvailableTimeSlots = async () => {
+    const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
+    const timezone = business.calendar.timezone;
+
+    console.log(response);
+    setTimeSlots(response);
+    //TODO: TOast if error and return to previous step
+  }
+
   return (
-    <section className='absolute inset-0 flex flex-col justify-between p-24'>
+    <section className='inset-0 flex flex-col justify-between p-4'>
       {/* Steps Navigation */}
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -294,44 +315,31 @@ export default function Form(params: any) {
               Избиране на дата и час
             </h2>
             <div className='mt-10'>
-              <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
-                <div className='sm:col-span-1'>
-                  <label
-                    htmlFor='date'
-                    className='block text-sm font-medium leading-6 text-gray-900'
-                  >
-                    Дата
-                  </label>
-                  <input
-                    type='date'
-                    id='date'
-                    {...register('data')}
-                    onChange={(e) => setStartDt(e.target.value)}
-                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                  />
-                  {errors.data && (
-                    <span className='text-sm text-red-600'>{errors.data.message}</span>
-                  )}
-                </div>
-                <div className='sm:col-span-1'>
-                  <label
-                    htmlFor='time'
-                    className='block text-sm font-medium leading-6 text-gray-900'
-                  >
-                    Час
-                  </label>
-                  <input
-                    type='time'
-                    id='time'
-                    {...register('hour')}
-                    onChange={(e) => setEndDt(e.target.value)}
-                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
-                  />
-                  {errors.hour && (
-                    <span className='text-sm text-red-600'>{errors.hour.message}</span>
-                  )}
-                </div>
-              </div>
+              <Calendar
+                timeSlots={timeSlots}
+                selected={startDate}
+                setSelected={setStartDate}
+                business={params.business} />
+                {new Date(startDate).toString()}
+                {
+                  startDate
+                  ?
+                  <div className='mt-6 grid grid-cols-2 gap-4'>
+                    {timeSlots.filter((slot: any) => new Date(slot.start).toISOString().startsWith(new Date(startDate).toISOString().split('T')[0])).map((slot: any) => (
+                      <button
+                        key={slot.start + slot.end + Math.random().toString()}
+                        onClick={() => {
+                          setStartDt(moment(slot.start).format('HH:mm'));
+                          setEndDt(moment(slot.end).format('HH:mm'));
+                        }}
+                        className='rounded bg-gray-300 py-2 text-gray-700'
+                      >
+                        {moment(slot.start).format('HH:mm')}
+                      </button>
+                    ))}
+                  </div>
+                  : null
+                }
             </div>
           </motion.div>
         )}

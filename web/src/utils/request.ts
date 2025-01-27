@@ -1,4 +1,4 @@
-const rootUrlApi = "http://192.168.0.185:2451";
+const rootUrlApi = "http://172.20.10.6:2451";
 
 async function getBusiness(topLevelDomain: string) {
     if(!topLevelDomain) {
@@ -33,7 +33,7 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
       throw new Error('Invalid input parameters');
   }
 
-  const url = `${rootUrlApi}/available?calendarId=${calendarId}&employeeId=${employeeId}&serviceId=${serviceId}`;
+  const url = `${rootUrlApi}/event/available?calendarId=${calendarId}&employeeId=${employeeId}&serviceId=${serviceId}`;
 
   try {
       const response = await fetch(url);
@@ -42,7 +42,6 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
       }
 
       const availableTimeSlots = await response.json();
-      console.log(availableTimeSlots);
       return availableTimeSlots;
   } catch (error: any) {
       console.error(error.message);
@@ -63,7 +62,7 @@ async function postEvent(eventData: {
       throw new Error('Invalid event data');
   }
 
-  const url = `${rootUrlApi}/`;
+  const url = `${rootUrlApi}/event`;
 
   try {
       const response = await fetch(url, {

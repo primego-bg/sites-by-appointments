@@ -56,6 +56,7 @@ router.get('/:tld', async (req, res, next) => {
             socialMedia: business.socialMedia,
             workingHours: business.workingHours,
             availableCalendar: true,
+            maximumDaysInFuture: business.maximumDaysInFuture,
             status: business.status
         };
 
@@ -70,6 +71,7 @@ router.get('/:tld', async (req, res, next) => {
 
         const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(business._id) });
         if(!calendar || calendar.status !== 'active') businessInfo.availableCalendar = false;
+        businessInfo.calendar = calendar;
 
         return res.status(HTTP_STATUS_CODES.OK).send({
             business: businessInfo
