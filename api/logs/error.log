@@ -77,3 +77,7 @@
 {"clientIp":"::ffff:172.20.10.6","dt":1738010174951,"level":"error","message":"errors.invalid_id"}
 {"clientIp":"::ffff:172.20.10.6","dt":1738010259619,"level":"error","message":"errors.invalid_id"}
 {"clientIp":"::ffff:172.20.10.6","dt":1738010351440,"level":"error","message":"errors.invalid_id"}
+{"clientIp":"::ffff:172.20.10.6","dt":1738010466863,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1738010471408,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1738010491170,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1738010528231,"level":"error","message":"errors.inactive"}
