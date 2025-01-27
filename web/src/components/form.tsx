@@ -23,7 +23,7 @@ const steps = [
   {
     id: 'Стъпка 2',
     name: 'Избор на дата и час',
-    fields: ['data', 'hour']
+    fields: ['date', 'hour']
   },
   {
     id: 'Стъпка 3',
@@ -56,7 +56,6 @@ export default function Form(params: any) {
 
   // start date used in calendar component
   const [startDate, setStartDate] = useState<any>(new Date());
-  const [startTime, setStartTime] = useState<any>(null);
 
   const delta = currentStep - previousStep
 
@@ -84,7 +83,7 @@ export default function Form(params: any) {
     const fields = steps[currentStep].fields
     const output = await trigger(fields as FieldName[], { shouldFocus: true })
 
-    if (!output) return
+    if (!output && currentStep != 1) return
 
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
@@ -328,9 +327,10 @@ export default function Form(params: any) {
                     {timeSlots.filter((slot: any) => new Date(slot.start).toISOString().startsWith(new Date(startDate).toISOString().split('T')[0])).map((slot: any) => (
                       <button
                         key={slot.start + slot.end + Math.random().toString()}
-                        onClick={() => {
-                          setStartDt(moment(slot.start).format('HH:mm'));
-                          setEndDt(moment(slot.end).format('HH:mm'));
+                        onClick={() => {                          
+                          setStartDt(slot.start);
+                          setEndDt(slot.end);
+                          next();
                         }}
                         className='rounded bg-gray-300 py-2 text-gray-700'
                       >
@@ -354,6 +354,8 @@ export default function Form(params: any) {
             <h2 className='text-base font-semibold leading-7 text-gray-900'>
               Вашите данни
             </h2>
+            {new Date(startDt).toString()}
+            {new Date(endDt).toString()}
             <div className='mt-10'>
               <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
                 <div className='sm:col-span-1'>
