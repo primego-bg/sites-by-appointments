@@ -275,6 +275,18 @@ const CalendarService = {
                             const eventEndDt = moment(event.end).seconds(0).milliseconds(0).toISOString();
             
                             if (
+                                !(
+                                    moment(currentTime).isSame(eventEndDt, 'minute') || 
+                                    moment(endTime).isSame(eventStartDt, 'minute')
+                                ) &&
+                                moment(currentTime).isBefore(eventEndDt) && 
+                                moment(endTime).isAfter(eventStartDt)
+                            ) {
+                                isTimeSlotAvailable = false;
+                                break;
+                            }
+
+                            if (
                                 !(moment(currentTime).isSame(eventEndDt, 'minute') || moment(endTime).isSame(eventStartDt, 'minute'))
                             ) {
                                 if (

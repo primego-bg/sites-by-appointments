@@ -136,6 +136,7 @@ router.get('/available', async (req, res, next) => {
         if(!employee.services.map(serviceId => serviceId.toString()).includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
 
         const serviceDuration = service.timeSlots * business.slotTime;
+        console.log(serviceDuration);
         const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(business._id, serviceDuration, employee.teamupSubCalendarId);
         
         return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots);

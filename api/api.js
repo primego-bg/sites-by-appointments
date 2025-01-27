@@ -8,6 +8,7 @@ const errorHandler = require('./errors/errorHandler');
 const dotenv = require('dotenv');
 const CalendarService = require('./services/calendar.service');
 const EmailService = require('./services/email.service');
+const CryptoService = require('./services/crypto.service');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -39,5 +40,6 @@ app.listen(port, function () {
 
 (async function init() { 
     CalendarService.syncAllCalendars();
+    //console.log(CryptoService.hash("ngmgokzpngcokanu"));
     //EmailService.sendEmail("67901559235c38f677a13c5c", "vencidim04@gmail.com", "Потвърждение на час", "Това е съобщение за потвърждение на час");
 })();
