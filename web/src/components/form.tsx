@@ -53,6 +53,9 @@ export default function Form(params: any) {
 
   const [shouldRefreshTimeSlots, setShouldRefreshTimeSlots] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [pointerEventsDisabled, setPointerEventsDisabled] = useState(false);
+
   const delta = currentStep - previousStep
 
   const business = params.business
@@ -107,7 +110,13 @@ export default function Form(params: any) {
   }
 
   const _getAvailableTimeSlots = async () => {
-    if(shouldRefreshTimeSlots) {
+    if (shouldRefreshTimeSlots) {
+      setPointerEventsDisabled(true);
+  
+      const timeout = setTimeout(() => {
+        setIsLoading(true);
+      }, 500);
+  
       try {
         const response = await getAvailableTimeSlots(business.calendar._id, employee, service);
         setTimeSlots(response);
@@ -115,15 +124,24 @@ export default function Form(params: any) {
         toast({
           title: "Грешка",
           description: error.message,
-          variant: "destructive"
-        })
+          variant: "destructive",
+        });
         prev();
+      } finally {
+        clearTimeout(timeout);
+        setIsLoading(false);
+        setPointerEventsDisabled(false);
       }
     }
-  }
+  };  
 
   const handleSubmit = async () => {
-    console.log("vutre sum");
+    setPointerEventsDisabled(true);
+  
+    const timeout = setTimeout(() => {
+      setIsLoading(true);
+    }, 500);
+  
     try {
       const eventData = {
         calendarId: business.calendar._id,
@@ -134,25 +152,29 @@ export default function Form(params: any) {
         endDt,
         name,
         email,
-        phone
-      }
-      console.log(eventData);
+        phone,
+      };
+  
       await postEvent(eventData);
       
       setOriginalState();
-
+  
       toast({
         title: "✅ Успешно записан час!",
         description: "Ще получите копие от резервацията на предоставения имейл",
-      })
+      });
     } catch (error: any) {
       toast({
         title: "Грешка",
         description: error.message,
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
+    } finally {
+      clearTimeout(timeout);
+      setIsLoading(false);
+      setPointerEventsDisabled(false);
     }
-  }
+  };  
 
   const setOriginalState = () => {
     setPreviousStep(0);
@@ -177,7 +199,15 @@ export default function Form(params: any) {
   }
 
   return (
-    <section className='inset-0 flex flex-col justify-between p-4'>
+    <>
+    {
+      isLoading
+      ? <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <LoadingSpinner className="text-white" size={36}/>
+      </div>
+      : null
+    }
+    <section className={`${pointerEventsDisabled ? 'pointer-events-none' : ''} inset-0 flex flex-col justify-between p-4`}>
       {/* Steps Navigation */}
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
@@ -559,5 +589,6 @@ export default function Form(params: any) {
         </div>
       </form>
     </section>
+    </>
   )
 }

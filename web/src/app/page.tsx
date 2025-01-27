@@ -73,7 +73,7 @@ export default function Home() {
                 }
               </>
           : <div className="flex flex-row space-x-2 items-center justify-center mt-4">
-            <LoadingSpinner className="text-zinc-500" />
+            <LoadingSpinner className="text-zinc-500" size={24} />
             <p className='text-zinc-800'>Зареждане</p>
         </div>
         }
