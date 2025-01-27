@@ -48,3 +48,5 @@
 {"clientIp":"::ffff:172.20.10.6","dt":1737926204749,"level":"error","message":"errors.inactive"}
 {"clientIp":"::ffff:172.20.10.6","dt":1737926283115,"level":"error","message":"errors.inactive"}
 {"clientIp":"::ffff:172.20.10.6","dt":1737926285506,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1737941878225,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1737941970693,"level":"error","message":"errors.inactive"}
