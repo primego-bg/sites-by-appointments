@@ -12,6 +12,8 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 import { TbChevronLeft } from "react-icons/tb";
 import { Progress } from './ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import Link from 'next/link';
 
 const steps = [
   {
@@ -226,43 +228,8 @@ export default function Form(params: any) {
         <Progress value={progress} className="w-[100%]" />
       </div>
 
-      {/* Steps Navigation }
-      <nav aria-label='Progress'>
-        <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
-          {steps.map((step, index) => (
-            <li key={step.name} className='md:flex-1'>
-              {currentStep > index ? (
-                <div className='group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                  <span className='text-sm font-medium text-sky-600 transition-colors'>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              ) : currentStep === index ? (
-                <div
-                  className='flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'
-                  aria-current='step'
-                >
-                  <span className='text-sm font-medium text-sky-600'>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              ) : (
-                <div className='group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4'>
-                  <span className='text-sm font-medium text-gray-500 transition-colors'>
-                    {step.id}
-                  </span>
-                  <span className='text-sm font-medium'>{step.name}</span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav> */}
-
       {/* Form */}
-      <form className='mt-12 py-12'>
+      <form className='mt-4'>
         {/* Step 1 */}
         {currentStep === 0 && (
           <motion.div
@@ -270,15 +237,11 @@ export default function Form(params: any) {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className="text-base font-semibold leading-7 text-gray-900">
-              Избиране на услуга
-            </h2>
-            <div className="mt-10 grid grid-cols-1 gap-y-6 sm:grid-cols-6">
               {/* Location Selector */}
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-3 mt-4">
                 <label
                   htmlFor="location"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-lg font-medium text-gray-700"
                 >
                   Локация
                 </label>
@@ -293,7 +256,7 @@ export default function Form(params: any) {
                     triggerValueReset(0);
                   }}
                   value={location || ''}
-                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
+                  className="block w-full rounded border border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-sky-600 focus:border-sky-600 sm:text-sm transition-all ease-in-out"
                 >
                   {!location ? <option value="">Изберете локация</option> : null}
                   {business.locations.map((location: any) => (
@@ -308,10 +271,10 @@ export default function Form(params: any) {
               </div>
 
               {/* Employee Selector */}
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-3 mt-4">
                 <label
                   htmlFor="employee"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-lg font-medium text-gray-700"
                 >
                   Бръснар
                 </label>
@@ -329,7 +292,7 @@ export default function Form(params: any) {
                     triggerValueReset(0);
                   }}
                   value={employee || ''}
-                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
+                  className="block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                 >
                   {!employee ? <option value="">Изберете бръснар</option> : null}
                   {location
@@ -357,64 +320,63 @@ export default function Form(params: any) {
               </div>
 
               {/* Service Selector */}
-                <div className="sm:col-span-3">
-                <label
-                  htmlFor="service"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Услуга
-                </label>
-                <select
-                  id="service"
-                  onChange={(e) => {
-                    const selectedService = e.target.value;
-                    setService(selectedService);
-                    if (!selectedService) {
-                      setLocation(null);
-                      setEmployee(null);
-                    } else {
-                      const barberWithService = business.employees.find((emp: any) =>
-                      emp.services.includes(selectedService)
-                      );
-                      if (barberWithService) {
-                      setEmployee(barberWithService._id);
-                      const employeeLocation = business.locations.find((loc: any) =>
-                        loc.employees.includes(barberWithService._id)
-                      )?._id;
-                      setLocation(employeeLocation);
-                      }
+              <div className="sm:col-span-3 mt-4">
+              <label
+                htmlFor="service"
+                className="block text-lg font-medium text-gray-700"
+              >
+                Услуга
+              </label>
+              <select
+                id="service"
+                onChange={(e) => {
+                  const selectedService = e.target.value;
+                  setService(selectedService);
+                  if (!selectedService) {
+                    setLocation(null);
+                    setEmployee(null);
+                  } else {
+                    const barberWithService = business.employees.find((emp: any) =>
+                    emp.services.includes(selectedService)
+                    );
+                    if (barberWithService) {
+                    setEmployee(barberWithService._id);
+                    const employeeLocation = business.locations.find((loc: any) =>
+                      loc.employees.includes(barberWithService._id)
+                    )?._id;
+                    setLocation(employeeLocation);
                     }
-                    setErrors({ ...errors, service: null, employee: null, location: null });
-                    triggerValueReset(0);
-                  }}
-                  value={service || ''}
-                  className="block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
-                >
-                  {!service ? <option value="">Изберете услуга</option> : null}
-                  {employee
-                  ? business.employees
-                    .find((emp: any) => emp._id === employee)
-                    ?.services.map((serviceId: any) => {
-                      const service = business.services.find(
-                      (srv: any) => srv._id === serviceId
-                      );
-                      return (
-                      <option key={service._id} value={service._id}>
-                        {service.name}
-                      </option>
-                      );
-                    })
-                  : business.services.map((service: any) => (
+                  }
+                  setErrors({ ...errors, service: null, employee: null, location: null });
+                  triggerValueReset(0);
+                }}
+                value={service || ''}
+                className="block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
+              >
+                {!service ? <option value="">Изберете услуга</option> : null}
+                {employee
+                ? business.employees
+                  .find((emp: any) => emp._id === employee)
+                  ?.services.map((serviceId: any) => {
+                    const service = business.services.find(
+                    (srv: any) => srv._id === serviceId
+                    );
+                    return (
                     <option key={service._id} value={service._id}>
                       {service.name}
                     </option>
-                    ))}
-                </select>
-                {errors.service && (
-                  <span className="text-sm text-red-600">{errors.service}</span>
-                )}
-                </div>
-            </div>
+                    );
+                  })
+                : business.services.map((service: any) => (
+                  <option key={service._id} value={service._id}>
+                    {service.name}
+                  </option>
+                  ))}
+              </select>
+              {errors.service && (
+                <span className="text-sm text-red-600">{errors.service}</span>
+              )}
+              </div>
           </motion.div>
         )}
 
@@ -425,12 +387,10 @@ export default function Form(params: any) {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Избиране на дата и час
-            </h2>
             {
               timeSlots && timeSlots.length > 0
               ? <div className='mt-10'>
+                  <div className='w-full flex justify-center'>
                   <Calendar
                     timeSlots={timeSlots}
                     selected={startDate}
@@ -438,6 +398,7 @@ export default function Form(params: any) {
                     business={params.business}
                     setStartDt={setStartDt}
                     setEndDt={setEndDt} />
+                    </div>
                     {
                       startDate
                       ? 
@@ -490,7 +451,7 @@ export default function Form(params: any) {
                     id='name'
                     value={name}
                     onChange={(e) => {setName(e.target.value); setErrors({ ...errors, name: null })}}
-                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.name && (
                     <span className='text-sm text-red-600'>{errors.name}</span>
@@ -508,7 +469,7 @@ export default function Form(params: any) {
                     id='phone'
                     value={phone}
                     onChange={(e) => {setPhone(e.target.value); setErrors({ ...errors, phone: null })}}
-                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.phone && (
                     <span className='text-sm text-red-600'>{errors.phone}</span>
@@ -526,7 +487,7 @@ export default function Form(params: any) {
                     id='email'
                     value={email}
                     onChange={(e) => {setEmail(e.target.value); setErrors({ ...errors, email: null })}}
-                    className='block w-full rounded-md border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
                   />
                   {errors.email && (
                     <span className='text-sm text-red-600'>{errors.email}</span>
@@ -585,13 +546,17 @@ export default function Form(params: any) {
 
         {/* Navigation buttons */}
         <div className='mt-6 flex justify-between'>
-          <button
-            type='button'
-            className='rounded bg-sky-600 py-2 px-4 text-sm font-semibold text-white'
-            onClick={next}
-          >
-            {currentStep === steps.length - 1 ? 'Потвърди' : 'Напред'}
-          </button>
+          {
+            currentStep == 1 && (!startDt || !endDt)
+            ? null
+            : <button
+                type='button'
+                className='rounded w-full mt-6 bg-black py-3 px-4 text-md font-semibold text-white'
+                onClick={next}
+              >
+                {currentStep === steps.length - 1 ? 'Потвърди' : 'Напред'}
+              </button>
+          }
         </div>
       </form>
     </section>

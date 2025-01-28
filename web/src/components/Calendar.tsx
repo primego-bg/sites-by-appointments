@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { DayPicker } from "react-day-picker";
-import "react-day-picker/style.css";
 import { bg } from "react-day-picker/locale";
 
 export function Calendar(params: any) {
@@ -45,6 +44,7 @@ export function Calendar(params: any) {
             mode="single"
             locale={bg}
             selected={params.selected}
+            captionLayout="label"
             onSelect={(date: any) => {
                 const pickedDateString = date.toISOString().split("T")[0];
                 params.setSelected(pickedDateString)
