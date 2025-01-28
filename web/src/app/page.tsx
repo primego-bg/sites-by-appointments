@@ -48,19 +48,19 @@ export default function Home() {
                           {
                             business.availableCalendar
                             ? <Form business={business} />
-                            : <div>
+                            : <div className='px-4 mt-8'>
                                 <h1 className='text-2xl font-bold'>Деактивирана система</h1>
                                 <p className='mt-3 text-gray-700'>В момента не приемаме нови записвания за часове, тъй като онлайн системата е временно деактивирана. Може да запазите своя час на телефон: <a className='underline text-blue-500' href={`tel:${business.phone}`}>{business.phone}</a></p>
                               </div>
                           }
                         </div>
                       : business.status === 'inactive'
-                        ? <div>
+                        ? <div className='px-4 mt-8'>
                             <h1 className='text-2xl font-bold'>Деактивирана система</h1>
                             <p className='mt-3 text-gray-700'>Изглежда, че не приемаме нови записвания за часове към момента, тъй като системата е временно или трайно деактивирана.</p>
                             </div>
                         : business.status === 'deleted'
-                          ? <div>
+                          ? <div className='px-4 mt-8'>
                               <h1 className='text-2xl font-bold'>Деактивирана система</h1>
                               <p className='mt-3 text-gray-700'>Изглежда, че не приемаме нови записвания за часове към момента, тъй като системата е временно или трайно деактивирана.</p>
                             </div>

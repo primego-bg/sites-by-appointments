@@ -127,3 +127,5 @@
 {"clientIp":"::ffff:172.20.10.1","dt":1738032091465,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
 {"clientIp":"::ffff:172.20.10.1","dt":1738032098204,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
 {"clientIp":"::ffff:172.20.10.1","dt":1738032243786,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738032864858,"level":"error","message":"errors.not_found"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738032882132,"level":"error","message":"errors.inactive"}

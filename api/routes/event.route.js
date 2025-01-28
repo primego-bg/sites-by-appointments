@@ -84,11 +84,9 @@ router.post('/', async (req, res, next) => {
         const emailSubject = `Вашият час за ${service.name} е потвърден`;
         const emailMessage = `
             Здравейте ${req.body.name},<br/>
-            <br/>
-            Детайли за вашия час:<br/>
-            <br/>
+            това са детайлите за вашия час:<br/>
             - Услуга: ${service.name}<br/>
-            - Кой: ${employee.name}<br/>
+            - Служител: ${employee.name}<br/>
             - Дата: ${moment(startDt).tz(req.body.timezone).format("YYYY-MM-DD")}<br/>
             - Час: ${moment(startDt).tz(req.body.timezone).format("HH:mm")}<br/>
             - Продължителност: ${duration} ${duration == 1 ? 'минута': 'минути'}<br/>
@@ -136,7 +134,6 @@ router.get('/available', async (req, res, next) => {
         if(!employee.services.map(serviceId => serviceId.toString()).includes(service._id.toString())) return next(new ResponseError("errors.invalid_service", HTTP_STATUS_CODES.CONFLICT));
 
         const serviceDuration = service.timeSlots * business.slotTime;
-        console.log(serviceDuration);
         const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(business._id, serviceDuration, employee.teamupSubCalendarId);
         
         return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots);

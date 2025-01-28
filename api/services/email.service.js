@@ -24,7 +24,7 @@ const EmailService = {
                 from: business.senderEmail,
                 to: email,
                 subject: subject,
-                text: message,
+                //text: message,
                 html: `
                     <div style="
                         font-family: 'Inter', sans-serif; 
