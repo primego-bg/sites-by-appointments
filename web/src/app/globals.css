@@ -9,11 +9,11 @@
 }
 
 .rdp-root {
-  --rdp-accent-color: #0881a3;
+  --rdp-accent-color: #00ACC2;
   --rdp-day-height: 52px;
   --rdp-day-width: 52px;
   --rdp-day_button-border: 1px solid #ccc;
-  --rdp-selected-border: 3px solid #0881a3;
+  --rdp-selected-border: 2px solid #00ACC2;
   --rdp-day_button-border-radius: 8px;
   --rdp-disabled-opacity: 0.2;
 }

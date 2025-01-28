@@ -409,9 +409,8 @@ export default function Form(params: any) {
                               onClick={() => {                          
                                 setStartDt(slot.start);
                                 setEndDt(slot.end);
-                                next();
                               }}
-                              className={`rounded bg-gray-300 py-2 text-gray-700`}
+                              className={`rounded bg-zinc-100 py-2 border shadow-lg ${slot.start == startDt ? 'border-cyan-500 border-2 text-black font-bold' : 'text-zinc-800 border-zinc-300'}`}
                             >
                               {moment(slot.start).format('HH:mm')}
                             </button>
