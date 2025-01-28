@@ -10,6 +10,9 @@ import moment from 'moment-timezone';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from './LoadingSpinner';
 
+import { TbChevronLeft } from "react-icons/tb";
+import { Progress } from './ui/progress';
+
 const steps = [
   {
     id: 'Стъпка 1',
@@ -21,7 +24,7 @@ const steps = [
   },
   {
     id: 'Стъпка 3',
-    name: 'Контактни данни',
+    name: 'Лични данни',
   },
   {
     id: 'Стъпка 4',
@@ -55,6 +58,7 @@ export default function Form(params: any) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [pointerEventsDisabled, setPointerEventsDisabled] = useState(false);
+  const [progress, setProgress] = useState(25)
 
   const delta = currentStep - previousStep
 
@@ -82,8 +86,10 @@ export default function Form(params: any) {
       if (currentStep === 0) {
         await _getAvailableTimeSlots();
       }
+      let temp = currentStep;
       setPreviousStep(currentStep)
       setCurrentStep(step => step + 1)
+      setProgress((temp+2) * (100 / steps.length));
     }
 
     if (currentStep === steps.length - 1) {
@@ -97,6 +103,7 @@ export default function Form(params: any) {
       setPreviousStep(currentStep)
       setCurrentStep(step => step - 1)
       triggerValueReset(temp)
+      setProgress(temp * (100 / steps.length));
     }
     if(temp === 1) {
       setShouldRefreshTimeSlots(false);
@@ -208,7 +215,18 @@ export default function Form(params: any) {
       : null
     }
     <section className={`${pointerEventsDisabled ? 'pointer-events-none' : ''} inset-0 flex flex-col justify-between p-4`}>
-      {/* Steps Navigation */}
+      <div>
+        <div className="flex items-center justify-start space-x-4 w-full py-3">
+          <button className="bg-zinc-100 shadow-lg flex items-center rounded border border-zinc-300 p-1" onClick={prev}>
+            <TbChevronLeft size={16} className="text-zinc-500" />
+            <p className="text-xs pr-1">Назад</p>
+          </button>
+          <span className="text-xl font-semibold text-zinc-800">{steps[currentStep].name}</span>
+        </div>
+        <Progress value={progress} className="w-[100%]" />
+      </div>
+
+      {/* Steps Navigation }
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
           {steps.map((step, index) => (
@@ -241,7 +259,7 @@ export default function Form(params: any) {
             </li>
           ))}
         </ol>
-      </nav>
+      </nav> */}
 
       {/* Form */}
       <form className='mt-12 py-12'>
@@ -567,18 +585,6 @@ export default function Form(params: any) {
 
         {/* Navigation buttons */}
         <div className='mt-6 flex justify-between'>
-          {
-            currentStep !== 0
-            ? <button
-            type='button'
-            className='rounded bg-gray-300 py-2 px-4 text-sm font-semibold text-gray-700'
-            onClick={prev}
-            disabled={currentStep === 0}
-          >
-            Назад
-          </button>
-          : null
-          }
           <button
             type='button'
             className='rounded bg-sky-600 py-2 px-4 text-sm font-semibold text-white'

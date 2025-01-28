@@ -20,16 +20,16 @@ export const BusinessHeader = (props: any) => {
     };
 
     return (
-        <div className="w-full h-20 flex items-center justify-between px-4">
+        <div className="w-full h-10 flex items-center justify-between px-4 pt-8 pb-4">
             <div className="flex items-center">
-                <img src={business.logo} alt="Лого" className="h-10" />
+                <img src={business.logo} alt="Лого" className="h-8" />
             </div>
             <Sheet>
-                <SheetTrigger className="bg-zinc-100 shadow-lg rounded border border-zinc-300 p-2" asChild>
+                <SheetTrigger className="bg-zinc-100 shadow-lg rounded border border-zinc-300 p-1" asChild>
                     <button className="hamburger-icon">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8"
+                        className="h-6 w-6"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="#666666"
