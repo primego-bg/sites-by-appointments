@@ -433,16 +433,13 @@ export default function Form(params: any) {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Вашите данни
-            </h2>
             <div className='mt-10'>
               <div className='sm:grid sm:grid-cols-2 sm:gap-x-6'>
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-1 mt-4'>
                   <label
                     htmlFor='name'
-                    className='block text-sm font-medium leading-6 text-gray-900'
-                  >
+                    className="block text-lg font-medium text-gray-700"
+                    >
                     Име
                   </label>
                   <input
@@ -450,16 +447,16 @@ export default function Form(params: any) {
                     id='name'
                     value={name}
                     onChange={(e) => {setName(e.target.value); setErrors({ ...errors, name: null })}}
-                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className="block w-full rounded border-zinc-300 bg-zinc-100 border px-2 py-1.5 text-zinc-900 shadow-sm focus:ring-sky-600 sm:text-sm"
                   />
                   {errors.name && (
                     <span className='text-sm text-red-600'>{errors.name}</span>
                   )}
                 </div>
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-1 mt-4'>
                   <label
                     htmlFor='phone'
-                    className='block text-sm font-medium leading-6 text-gray-900'
+                    className="block text-lg font-medium text-gray-700"
                   >
                     Телефон
                   </label>
@@ -468,16 +465,16 @@ export default function Form(params: any) {
                     id='phone'
                     value={phone}
                     onChange={(e) => {setPhone(e.target.value); setErrors({ ...errors, phone: null })}}
-                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className="block w-full rounded border-zinc-300 bg-zinc-100 border px-2 py-1.5 text-zinc-900 shadow-sm focus:ring-sky-600 md:text-md"
                   />
                   {errors.phone && (
                     <span className='text-sm text-red-600'>{errors.phone}</span>
                   )}
                 </div>
-                <div className='sm:col-span-1'>
+                <div className='sm:col-span-1 mt-4'>
                   <label
                     htmlFor='email'
-                    className='block text-sm font-medium leading-6 text-gray-900'
+                    className="block text-lg font-medium text-gray-700"
                   >
                     Имейл
                   </label>
@@ -486,7 +483,7 @@ export default function Form(params: any) {
                     id='email'
                     value={email}
                     onChange={(e) => {setEmail(e.target.value); setErrors({ ...errors, email: null })}}
-                    className='block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm'
+                    className="block w-full rounded border-zinc-300 bg-zinc-100 border px-2 py-1.5 text-zinc-900 shadow-sm focus:ring-sky-600 md:text-md"
                   />
                   {errors.email && (
                     <span className='text-sm text-red-600'>{errors.email}</span>
@@ -504,9 +501,6 @@ export default function Form(params: any) {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className='text-base font-semibold leading-7 text-gray-900'>
-              Потвърждение
-            </h2>
             <div className='mt-10'>
               <p>
                 <strong>Локация:</strong> {business.locations.find((loc: any) => loc._id === location)?.name}
@@ -553,7 +547,7 @@ export default function Form(params: any) {
                 className='rounded w-full mt-6 bg-black py-3 px-4 text-md font-semibold text-white'
                 onClick={next}
               >
-                {currentStep === steps.length - 1 ? 'Потвърди' : 'Напред'}
+                {currentStep === steps.length - 1 ? 'Потвърди и запиши час' : 'Напред'}
               </button>
           }
         </div>
