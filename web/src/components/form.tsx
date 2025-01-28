@@ -70,13 +70,14 @@ export default function Form(params: any) {
     const validateStep = () => {
       let errors: any = {};
       if (currentStep === 0) {
-      if (!location) errors.location = 'Изберете локация';
-      if (!employee) errors.employee = 'Изберете бръснар';
-      if (!service) errors.service = 'Изберете услуга';
+        if (!location) errors.location = 'Изберете локация';
+        if (!employee) errors.employee = 'Изберете бръснар';
+        if (!service) errors.service = 'Изберете услуга';
       } else if (currentStep === 2) {
-      if (!name) errors.name = 'Името е задължително';
-      if (!phone) errors.phone = 'Телефонният номер е задължителен';
-      if (!email) errors.email = 'Имейлът е задължителен';
+        if (!name) errors.name = 'Името е задължително';
+        if (!phone) errors.phone = 'Телефонният номер е задължителен';
+        if (!email) errors.email = 'Имейлът е задължителен';
+        if (!email.match('[A-Za-z0-9\\._%+\\-]+@[A-Za-z0-9\\.-]+\\.[A-Za-z]{2,}')) errors.email = 'Имейлът е невалиден';
       }
       setErrors(errors);
       return Object.keys(errors).length === 0;

@@ -132,7 +132,7 @@ const eventPostValidation = (data) => {
             return value;
         }).required(),
         name: Joi.string().min(3).max(100).required(),
-        email: Joi.string().email().required(),
+        email: Joi.string().pattern(new RegExp('[A-Za-z0-9\\._%+\\-]+@[A-Za-z0-9\\.-]+\\.[A-Za-z]{2,}')).required(),
         phone: Joi.string().required(),
     });
 

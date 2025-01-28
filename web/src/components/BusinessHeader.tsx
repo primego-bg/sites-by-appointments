@@ -48,7 +48,7 @@ export const BusinessHeader = (props: any) => {
                         <SheetTitle>{business.name}</SheetTitle>
                         {
                             business.description
-                            ? <SheetDescription className="text-justify">{business.description}</SheetDescription>
+                            ? <SheetDescription>{business.description}</SheetDescription>
                             : null
                         }
                     </SheetHeader>

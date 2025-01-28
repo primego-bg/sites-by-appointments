@@ -121,3 +121,9 @@
 {"clientIp":"::ffff:172.20.10.6","dt":1738015466661,"level":"error","message":"errors.inactive"}
 {"clientIp":"::ffff:172.20.10.6","dt":1738015475981,"level":"error","message":"errors.teamup_event_creation_failed"}
 {"clientIp":"::ffff:172.20.10.6","dt":1738015592291,"level":"error","message":"errors.internal_server_error"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738031297670,"level":"error","message":"\"email\" must be a valid email"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738031305488,"level":"error","message":"\"email\" must be a valid email"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738031345986,"level":"error","message":"\"email\" must be a valid email"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738032091465,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738032098204,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
+{"clientIp":"::ffff:172.20.10.1","dt":1738032243786,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}

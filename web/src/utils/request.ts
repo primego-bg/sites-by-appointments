@@ -19,6 +19,8 @@ async function handleResponse(response: Response) {
             const errorData = await response.json(); // Parse the JSON response
             if (errorData?.error && errorMessages[errorData.error]) {
                 errorMessage = errorMessages[errorData.error]; // Map the error to a friendly message
+            } else if (response.status == 400 && errorData?.error) {
+                errorMessage = errorData.error;
             }
         } catch {
             // If response is not JSON, fall back to default message

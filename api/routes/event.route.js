@@ -83,15 +83,15 @@ router.post('/', async (req, res, next) => {
         const customerEmail = req.body.email;
         const emailSubject = `Вашият час за ${service.name} е потвърден`;
         const emailMessage = `
-            Здравейте ${req.body.name},
-            
-            Потвърждение за вашия час:
-            
-            - Услуга: ${service.name}
-            - Кой: ${employee.name}
-            - Дата: ${moment(startDt).tz(req.body.timezone).format("YYYY-MM-DD")}
-            - Час: ${moment(startDt).tz(req.body.timezone).format("HH:mm")}
-            - Продължителност: ${duration} ${duration == 1 ? 'минута': 'минути'}
+            Здравейте ${req.body.name},<br/>
+            <br/>
+            Детайли за вашия час:<br/>
+            <br/>
+            - Услуга: ${service.name}<br/>
+            - Кой: ${employee.name}<br/>
+            - Дата: ${moment(startDt).tz(req.body.timezone).format("YYYY-MM-DD")}<br/>
+            - Час: ${moment(startDt).tz(req.body.timezone).format("HH:mm")}<br/>
+            - Продължителност: ${duration} ${duration == 1 ? 'минута': 'минути'}<br/>
         `;
 
         await EmailService.sendEmail(business, customerEmail, emailSubject, emailMessage);
