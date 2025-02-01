@@ -1,4 +1,4 @@
-const rootUrlApi = "http://172.20.10.6:2451";
+const rootUrlApi = "https://api.appointments.sitezup.com";
 
 const errorMessages: { [key: string]: string } = {
     "errors.inactive": "Resource not available",

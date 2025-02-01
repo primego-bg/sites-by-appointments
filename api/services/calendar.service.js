@@ -200,150 +200,155 @@ const CalendarService = {
             return null;
         }
     },
-    getAvailableTimeSlotsForService: async (businessId, timeSlotsDuration, teamupSubCalendarId=undefined) => {
-        try {
-            const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
-            if(!business) return null;
-            const businessWorkingHours = business.workingHours;
-            const businessMaximumDaysInFuture = business.maximumDaysInFuture;
-            const businessMinimumTimeSlots = business.minimumTimeSlotsInFuture;
-            const businessSlotTime = business.slotTime;
+        getAvailableTimeSlotsForService: async (businessId, timeSlotsDuration, teamupSubCalendarId=undefined) => {
+            try {
+                const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
+                if(!business) return null;
+                const businessWorkingHours = business.workingHours;
+                const businessMaximumDaysInFuture = business.maximumDaysInFuture;
+                const businessMinimumTimeSlots = business.minimumTimeSlotsInFuture;
+                const businessSlotTime = business.slotTime;
 
-            const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(businessId) });
-            if(!calendar) return null;
+                const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId: new mongoose.Types.ObjectId(businessId) });
+                if(!calendar) return null;
 
-            // get events from calendars
-            // TODO: events shall be got from now on
-            const events = !teamupSubCalendarId
-                ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
-                : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId] } });
+                const momentTimezone = calendar.timezone;
 
-            const availableTimeSlots = [];
-            const today = moment().toISOString();
+                // get events from calendars
+                // TODO: events shall be got from now on
+                const events = !teamupSubCalendarId
+                    ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
+                    : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId] } });
 
-            // get all available time slots
-            // iterate through each day from today to todayPlusMaxDays
-            
-            for (let i = 0; i < businessMaximumDaysInFuture; i++) {
-                const currentDate = moment(today).add(i, 'days').toISOString();
-                const currentDay = moment(currentDate).format('dddd').toLowerCase();
-            
-                // Calculate the cutoff time for the current date
-                const minimumTimeAllowed = moment(today)
-                    .add(businessMinimumTimeSlots * businessSlotTime, 'minutes') // Add minimum time slots in the future
-                    .toISOString();
-            
-                let isBusinessOpen = false;
-                let businessOpenTime = null;
-                let businessCloseTime = null;
-            
-                for (let j = 0; j < businessWorkingHours.length; j++) {
-                    if (businessWorkingHours[j].day === currentDay) {
-                        if (businessWorkingHours[j].open === undefined || businessWorkingHours[j].close === undefined) break;
-                        isBusinessOpen = true;
-                        businessOpenTime = moment(currentDate).set({
-                            hour: parseInt(businessWorkingHours[j].open.split(':')[0]),
-                            minute: parseInt(businessWorkingHours[j].open.split(':')[1]),
-                        }).toISOString();
-                        businessCloseTime = moment(currentDate).set({
-                            hour: parseInt(businessWorkingHours[j].close.split(':')[0]),
-                            minute: parseInt(businessWorkingHours[j].close.split(':')[1]),
-                        }).toISOString();
-                        break;
+                const availableTimeSlots = [];
+                const today = moment().tz(momentTimezone).toISOString();
+
+                // get all available time slots
+                // iterate through each day from today to todayPlusMaxDays
+                
+                for (let i = 0; i < businessMaximumDaysInFuture; i++) {
+                    const currentDate = moment(today).add(i, 'days').tz(momentTimezone).toISOString();
+                    const currentDay = moment(currentDate).tz(momentTimezone).format('dddd').toLowerCase();
+                
+                    // Calculate the cutoff time for the current date
+                    const minimumTimeAllowed = moment(today)
+                        .add(businessMinimumTimeSlots * businessSlotTime, 'minutes') // Add minimum time slots in the future
+                        .tz(momentTimezone).toISOString();
+                
+                    let isBusinessOpen = false;
+                    let businessOpenTime = null;
+                    let businessCloseTime = null;
+                
+                    for (let j = 0; j < businessWorkingHours.length; j++) {
+                        if (businessWorkingHours[j].day === currentDay) {
+                            if (businessWorkingHours[j].open === undefined || businessWorkingHours[j].close === undefined) break;
+                            isBusinessOpen = true;
+                            businessOpenTime = moment(currentDate).set({
+                                hour: parseInt(businessWorkingHours[j].open.split(':')[0]),
+                                minute: parseInt(businessWorkingHours[j].open.split(':')[1]),
+                            }).tz(momentTimezone).toISOString();
+                            businessCloseTime = moment(currentDate).set({
+                                hour: parseInt(businessWorkingHours[j].close.split(':')[0]),
+                                minute: parseInt(businessWorkingHours[j].close.split(':')[1]),
+                            }).tz(momentTimezone).toISOString();
+                            break;
+                        }
                     }
-                }
-            
-                // Skip the day if the business is not open
-                if (!isBusinessOpen) continue;
-            
-                // Ensure the business open time respects the minimum cutoff
-                if (moment(businessOpenTime).isBefore(minimumTimeAllowed)) {
-                    businessOpenTime = minimumTimeAllowed;
-                }
-            
-                // Generate time slots for the current day
-                let currentTime = moment(businessOpenTime).toISOString();
-                while (moment(currentTime).isBefore(businessCloseTime)) {
-                    const endTime = moment(currentTime).add(timeSlotsDuration, 'minutes').toISOString();
-                    if (moment(endTime).isAfter(businessCloseTime)) break;
-            
-                    let isTimeSlotAvailable = true;
-                    if (events) {
-                        for (let j = 0; j < events.length; j++) {
-                            const event = events[j];
-                            const eventStartDt = moment(event.start).seconds(0).milliseconds(0).toISOString();
-                            const eventEndDt = moment(event.end).seconds(0).milliseconds(0).toISOString();
-            
-                            if (
-                                !(
-                                    moment(currentTime).isSame(eventEndDt, 'minute') || 
-                                    moment(endTime).isSame(eventStartDt, 'minute')
-                                ) &&
-                                moment(currentTime).isBefore(eventEndDt) && 
-                                moment(endTime).isAfter(eventStartDt)
-                            ) {
-                                isTimeSlotAvailable = false;
-                                break;
-                            }
-
-                            if (
-                                !(moment(currentTime).isSame(eventEndDt, 'minute') || moment(endTime).isSame(eventStartDt, 'minute'))
-                            ) {
+                
+                    // Skip the day if the business is not open
+                    if (!isBusinessOpen) continue;
+                
+                    // Ensure the business open time respects the minimum cutoff
+                    while (moment(businessOpenTime).isBefore(minimumTimeAllowed)) {
+                        businessOpenTime = moment(businessOpenTime).add(businessSlotTime, 'minutes').tz(momentTimezone).toISOString();
+                    }
+                
+                    // Generate time slots for the current day
+                    let currentTime = moment(businessOpenTime).toISOString();
+                    while (moment(currentTime).isBefore(businessCloseTime)) {
+                        const endTime = moment(currentTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
+                        if (moment(endTime).isAfter(businessCloseTime)) break;
+                
+                        let isTimeSlotAvailable = true;
+                        if (events) {
+                            for (let j = 0; j < events.length; j++) {
+                                const event = events[j];
+                                const eventStartDt = moment(event.start).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
+                                const eventEndDt = moment(event.end).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
+                
                                 if (
-                                    moment(currentTime).isBetween(eventStartDt, eventEndDt, null, '[)') ||
-                                    moment(endTime).isBetween(eventStartDt, eventEndDt, null, '(]')
+                                    !(
+                                        moment(currentTime).isSame(eventEndDt, 'minute') || 
+                                        moment(endTime).isSame(eventStartDt, 'minute')
+                                    ) &&
+                                    moment(currentTime).isBefore(eventEndDt) && 
+                                    moment(endTime).isAfter(eventStartDt)
                                 ) {
                                     isTimeSlotAvailable = false;
                                     break;
                                 }
+
+                                if (
+                                    !(moment(currentTime).isSame(eventEndDt, 'minute') || moment(endTime).isSame(eventStartDt, 'minute'))
+                                ) {
+                                    if (
+                                        moment(currentTime).isBetween(eventStartDt, eventEndDt, null, '[)') ||
+                                        moment(endTime).isBetween(eventStartDt, eventEndDt, null, '(]')
+                                    ) {
+                                        isTimeSlotAvailable = false;
+                                        break;
+                                    }
+                                }
                             }
                         }
+                
+                        if (isTimeSlotAvailable) {
+                            availableTimeSlots.push({
+                                start: moment(currentTime).seconds(0).milliseconds(0).toISOString(),
+                                end: moment(endTime).seconds(0).milliseconds(0).toISOString(),
+                            });
+                        }
+                
+                        currentTime = moment(currentTime).add(businessSlotTime, 'minutes').tz(momentTimezone).toISOString();
                     }
-            
-                    if (isTimeSlotAvailable) {
-                        availableTimeSlots.push({
-                            start: moment(currentTime).seconds(0).milliseconds(0).toISOString(),
-                            end: moment(endTime).seconds(0).milliseconds(0).toISOString(),
-                        });
-                    }
-            
-                    currentTime = moment(currentTime).add(businessSlotTime, 'minutes').toISOString();
-                }
-            }            
-            return availableTimeSlots;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
-    },
-    checkTimeSlotValidityAndAvailability: async (calendarId, startDt, endDt, teamupSubCalendarId=null) => {
-        try {
-            // startDt and endDt are ISO strings
+                }            
+                return availableTimeSlots;
+            } catch (error) {
+                console.error(error);
+                return null;
+            }},
+            checkTimeSlotValidityAndAvailability: async (calendarId, startDt, endDt, teamupSubCalendarId=null) => {
+            try {
+                // startDt and endDt are ISO strings
 
-            const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
-            if(!calendar) return null;
+                const calendar = await DbService.getById(COLLECTIONS.CALENDARS, calendarId);
+                if(!calendar) return null;
 
-            // get business
-            const business = await DbService.getById(COLLECTIONS.BUSINESSES, calendar.businessId);
-            if(!business) return null;
+                // get business
+                const business = await DbService.getById(COLLECTIONS.BUSINESSES, calendar.businessId);
+                if(!business) return null;
 
-            const timeSlotsDuration = moment(endDt).diff(moment(startDt), 'minutes');
-            const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(calendar.businessId, timeSlotsDuration, teamupSubCalendarId);
-            if(!availableTimeSlots || availableTimeSlots.length == 0) return null;
+                const momentTimezone = calendar.timezone;
+                startDt = moment(startDt).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
+                endDt = moment(endDt).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
 
-            let isTimeSlotValid = false;
-            for(let i = 0; i < availableTimeSlots.length; i++) {
-                if(moment(startDt).seconds(0).milliseconds(0).toISOString() === availableTimeSlots[i].start && moment(endDt).seconds(0).milliseconds(0).toISOString() === availableTimeSlots[i].end) {
+                const timeSlotsDuration = moment(endDt).diff(moment(startDt), 'minutes');
+                const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(calendar.businessId, timeSlotsDuration, teamupSubCalendarId);
+                if(!availableTimeSlots || availableTimeSlots.length == 0) return null;
+
+                let isTimeSlotValid = false;
+                for(let i = 0; i < availableTimeSlots.length; i++) {
+                if(startDt === availableTimeSlots[i].start && endDt === availableTimeSlots[i].end) {
                     isTimeSlotValid = true;
                     break;
                 }
-            }
+                }
 
-            return isTimeSlotValid;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
+                return isTimeSlotValid;
+            } catch (error) {
+                console.error(error);
+                return null;
+            }
     }
 }
 
