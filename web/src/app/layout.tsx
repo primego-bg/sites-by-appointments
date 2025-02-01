@@ -33,6 +33,11 @@ export default function RootLayout({
           <Toaster />
         </main>
         <Footer />
+        <script
+          defer
+          type="text/javascript"
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+        />
       </body>
     </html>
   );
