@@ -92,6 +92,8 @@ router.post('/', async (req, res, next) => {
             - Продължителност: ${duration} ${duration == 1 ? 'минута': 'минути'}<br/>
         `;
 
+        const location = await DbService.getOne(COLLECTIONS.LOCATIONS, {employees: {"$in": [new mongoose.Types.ObjectId(employee._id), employee._id]}})
+        if(location && location.phone) business.phone = location.phone
         await EmailService.sendEmail(business, customerEmail, emailSubject, emailMessage);
 
         return;

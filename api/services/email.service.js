@@ -47,7 +47,7 @@ const EmailService = {
                             <strong>Имейл:</strong> 
                             <a href="mailto:${business.email}" style="color: #007BFF; text-decoration: none;">${business.email}</a> 
                             <br>
-                            <strong>Телефон:</strong> 
+                            <strong>Телефон на обекта:</strong> 
                             <a href="tel:${business.phone}" style="color: #007BFF; text-decoration: none;">${business.phone}</a> 
                             <br>
                             <strong>Уебсайт:</strong> 
