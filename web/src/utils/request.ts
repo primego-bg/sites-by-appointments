@@ -1,4 +1,4 @@
-const rootUrlApi = "http://localhost:2451";
+const rootUrlApi = "http://192.168.0.185:2451";
 //https://api.appointments.sitezup.com
 
 const errorMessages: { [key: string]: string } = {

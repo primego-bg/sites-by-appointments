@@ -216,12 +216,9 @@ const CalendarService = {
 
                 // get events from calendars
                 // TODO: events shall be got from now on
-                console.log(teamupSubCalendarId);
                 const events = !teamupSubCalendarId
                     ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
                     : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId, parseInt(teamupSubCalendarId, 10)] } });
-
-                console.log(events.length);
 
                 const availableTimeSlots = [];
                 const today = moment().tz(momentTimezone).toISOString();
