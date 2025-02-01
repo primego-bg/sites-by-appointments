@@ -27,8 +27,10 @@ const TeamupService = {
             //     };
             // };
 
-            const endDate = `${new Date(startDate).getFullYear() + 1}-${new Date(startDate).getMonth() + 1}-${new Date(startDate).getDate()}`;            
-            const response = await axios.get(`https://api.teamup.com/${teamupSecretCalendarKey}/events?startDate=${startDate}&endDate=${endDate}`, {
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + 3);
+            const formattedEndDate = `${endDate.getFullYear()}-${endDate.getMonth() + 1}-${endDate.getDate()}`;
+            const response = await axios.get(`https://api.teamup.com/${teamupSecretCalendarKey}/events?startDate=${startDate}&endDate=${formattedEndDate}`, {
                 headers: {
                     'Teamup-Token': teamupApiKey
                 }
