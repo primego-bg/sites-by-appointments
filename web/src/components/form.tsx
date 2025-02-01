@@ -206,6 +206,8 @@ export default function Form(params: any) {
     setErrors({});
 
     setShouldRefreshTimeSlots(false);
+
+    setProgress(25);
   }
 
   return (

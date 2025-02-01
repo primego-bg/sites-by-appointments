@@ -8,7 +8,7 @@ import {
   } from "@/components/ui/sheet"
 import Link from "next/link";
 
-import { MdLocalPhone, MdEmail, MdLink  } from "react-icons/md";
+import { MdLocalPhone, MdEmail, MdLink, MdPhone  } from "react-icons/md";
 
 export const BusinessHeader = (props: any) => {
 
@@ -52,6 +52,7 @@ export const BusinessHeader = (props: any) => {
                             : null
                         }
                     </SheetHeader>
+                    {/*
                     <div className="flex w-full mt-6 space-x-4">
                         <Link
                         key={'phone'}
@@ -81,18 +82,39 @@ export const BusinessHeader = (props: any) => {
                             <MdLink size={24} />
                         </Link>
                     </div>
+                    */}
                     <div className="flex w-full mt-4 space-x-4">
                         {Object.entries(business.socialMedia).map(([key, url]: any) => (
                             <Link
-                            key={key}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex flex-1 items-center justify-center hover:bg-zinc-100 border border-zinc-300 p-6 rounded shadow-lg`}
-                            >
+                                key={key}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex flex-1 items-center justify-center hover:bg-zinc-100 border border-zinc-300 p-6 rounded shadow-lg`}>
                                 {getIconComponent(key)}
                             </Link>
                         ))}
+                    </div>
+                    <div className="space-y-4 mt-8">
+                        {
+                            business.locations.map((location: any, index: any) => 
+                                <a key={index} href={`tel:${location.phone}`} className="flex items-center p-4 bg-zinc-100 rounded-sm shadow-sm hover:bg-gray-200 transition duration-200">
+                                    {/* Icon */}
+                                    <div className="flex-shrink-0 text-2xl mr-4">
+                                        <MdPhone size={24} />
+                                    </div>
+                                    {/* Text Content */}
+                                    <div>
+                                        <p className="text-lg font-semibold text-gray-800">
+                                        {location.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                        {location.phone}
+                                        </p>
+                                    </div>
+                                </a>
+                            )
+                        }
                     </div>
                 </SheetContent>
             </Sheet>

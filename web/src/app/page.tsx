@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { BusinessHeader } from '@/components/BusinessHeader';
 import { useToast } from '@/hooks/use-toast';
+import Footer from '@/components/footer';
 
 export default function Home() {
 

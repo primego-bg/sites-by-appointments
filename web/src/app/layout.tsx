@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import "react-day-picker/style.css";
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import Footer from '@/components/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,12 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="bg">
       <body className={inter.className}>
         <main className="min-h-screen max-w-7xl mx-auto">
           {children}
           <Toaster />
         </main>
+        <Footer />
       </body>
     </html>
   );
