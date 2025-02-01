@@ -86,6 +86,7 @@ const locationPostValidation = (data) => {
             }
             return value;
         })),
+        phone: Joi.string().required(),
         status: Joi.string().valid('active', 'inactive', 'deleted').required()
     });
 

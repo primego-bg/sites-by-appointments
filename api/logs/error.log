@@ -129,3 +129,8 @@
 {"clientIp":"::ffff:172.20.10.1","dt":1738032243786,"level":"error","message":"\"email\" with value \"test@testtt.com\" fails to match the required pattern: /\\/^[w.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$\\//"}
 {"clientIp":"::ffff:172.20.10.1","dt":1738032864858,"level":"error","message":"errors.not_found"}
 {"clientIp":"::ffff:172.20.10.1","dt":1738032882132,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1738415979754,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1738416000444,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1738416016922,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1738416476407,"level":"error","message":"errors.inactive"}
+{"clientIp":"::1","dt":1738416485122,"level":"error","message":"errors.inactive"}

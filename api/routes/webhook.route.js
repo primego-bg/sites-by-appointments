@@ -9,7 +9,7 @@ const CalendarService = require('../services/calendar.service');
 const router = express.Router();
 
 router.post('/event', async (req, res, next) => {
-    const webhookSecret = 'C6nKjhS5fj9rQhcQ5hppEht44ARc2z7n559SdJt97uMZTBYJ9mejLkvGNEqXZbAAzZrc58hLQz2RQzBGePib7p5eCJaVrjysoPHAUfvvA3HJ22BZGFrf911C6skFSFYr';
+    const webhookSecret = 'UwBkEp8PEYDVkrTrRNp2fwLR9SpohxNNDVao5HpSu5QKAr2fCca4doTYoACXJzVCBaH9Z8Kc2TEjQKWy9T9ovyaQ4o2j1jYH1LYfB4FVBREJpv6ziEJ8qg1aCMmQVDzW';
     const signature = req.headers['teamup-signature'];
     const payload = JSON.stringify(req.body);
 

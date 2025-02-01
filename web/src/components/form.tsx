@@ -337,16 +337,18 @@ export default function Form(params: any) {
                     setLocation(null);
                     setEmployee(null);
                   } else {
-                    const barberWithService = business.employees.find((emp: any) =>
-                    emp.services.includes(selectedService)
-                    );
-                    if (barberWithService) {
-                    setEmployee(barberWithService._id);
-                    const employeeLocation = business.locations.find((loc: any) =>
-                      loc.employees.includes(barberWithService._id)
-                    )?._id;
-                    setLocation(employeeLocation);
-                    }
+                    if(!location || !employee) {
+                      const barberWithService = business.employees.find((emp: any) =>
+                        emp.services.includes(selectedService)
+                        );
+                        if (barberWithService) {
+                          setEmployee(barberWithService._id);
+                          const employeeLocation = business.locations.find((loc: any) =>
+                            loc.employees.includes(barberWithService._id)
+                          )?._id;
+                          setLocation(employeeLocation);
+                        }
+                    } 
                   }
                   setErrors({ ...errors, service: null, employee: null, location: null });
                   triggerValueReset(0);

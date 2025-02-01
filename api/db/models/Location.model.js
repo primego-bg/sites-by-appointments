@@ -22,6 +22,10 @@ const locationSchema = mongoose.Schema({
         max: 180,
         required: true
     },
+    phone: {
+        type: String,
+        required: true,
+    },
     businessId: {
         type: mongoose.Types.ObjectId,
         ref: DATABASE_MODELS.BUSINESS,
