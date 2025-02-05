@@ -543,7 +543,8 @@ export default function Form(params: any) {
         )}
 
         {/* Navigation buttons */}
-        <div className='mt-6 flex justify-between'>
+        <div className='mt-6 justify-between'>
+          <p className='text-zinc-700 text-xs'>При записване на час се съгласявате с нашата <a href={`${business.privacyPolicyURL}`} target='_blank' className='text-blue-500'>Политика за поверителност</a></p>
           {
             currentStep == 1 && (!startDt || !endDt)
             ? null

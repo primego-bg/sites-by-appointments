@@ -57,7 +57,8 @@ router.get('/:tld', async (req, res, next) => {
             workingHours: business.workingHours,
             availableCalendar: true,
             maximumDaysInFuture: business.maximumDaysInFuture,
-            status: business.status
+            status: business.status,
+            privacyPolicyURL: business.privacyPolicyURL
         };
 
         const services = await DbService.getMany(COLLECTIONS.SERVICES, { businessId: new mongoose.Types.ObjectId(business._id), status: 'active' });
