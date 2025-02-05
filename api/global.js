@@ -5,6 +5,7 @@ const DATABASE_MODELS = {
     LOCATION: "Location",
     SERVICE: "Service",
     BUSINESS: "Business",
+    PERSONAL_DATA: "PersonalData"
 }
 
 const COLLECTIONS = {
@@ -14,6 +15,7 @@ const COLLECTIONS = {
     LOCATIONS: "locations",
     SERVICES: "services",
     BUSINESSES: "businesses",
+    PERSONAL_DATA: "personalData"
 }
 
 const HTTP_STATUS_CODES = {

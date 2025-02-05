@@ -9,7 +9,7 @@ const CalendarService = require('../services/calendar.service');
 const router = express.Router();
 
 router.post('/event', async (req, res, next) => {
-    const webhookSecret = 'UwBkEp8PEYDVkrTrRNp2fwLR9SpohxNNDVao5HpSu5QKAr2fCca4doTYoACXJzVCBaH9Z8Kc2TEjQKWy9T9ovyaQ4o2j1jYH1LYfB4FVBREJpv6ziEJ8qg1aCMmQVDzW';
+    const webhookSecret = 'C6nKjhS5fj9rQhcQ5hppEht44ARc2z7n559SdJt97uMZTBYJ9mejLkvGNEqXZbAAzZrc58hLQz2RQzBGePib7p5eCJaVrjysoPHAUfvvA3HJ22BZGFrf911C6skFSFYr';
     const signature = req.headers['teamup-signature'];
     const payload = JSON.stringify(req.body);
 
@@ -27,16 +27,26 @@ router.post('/event', async (req, res, next) => {
                 const event = item.event;
 
                 const subcalendar_ids = event.subcalendar_ids;
-                const employee = await DbService.getOne(COLLECTIONS.EMPLOYEES, { teamupSubCalendarId: subcalendar_ids[0] });
+                const employee = await DbService.getOne(COLLECTIONS.EMPLOYEES, { teamupSubCalendarId: {"$in" : [subcalendar_ids[0], subcalendar_ids[0].toString()]} });
                 if(!employee) return res.status(404).send('Employee not found');
+
                 const businessId = employee.businessId;
                 const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
                 if(!business) return res.status(404).send('Business not found');
+
                 const calendar = await DbService.getOne(COLLECTIONS.CALENDARS, { businessId });
                 if(!calendar) return res.status(404).send('Calendar not found');
     
                 if(trigger == 'event.removed') {
-                    await DbService.delete(COLLECTIONS.EVENTS, { teamupEventId: eventId });
+                    if(!event.rrule) {
+                        await DbService.delete(COLLECTIONS.EVENTS, { teamupEventId: eventId });
+                    } else {
+                        try {
+                            await CalendarService.syncCalendar(calendar._id);
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
                     return res.status(200).send('Event received');
                 }
     
@@ -49,9 +59,19 @@ router.post('/event', async (req, res, next) => {
                     start: event.start_dt,
                     end: event.end_dt
                 });
+
     
                 if(trigger == 'event.created') {
-                    await DbService.create(COLLECTIONS.EVENTS, newEvent);
+                    if(!event.rrule) {
+                        await DbService.create(COLLECTIONS.EVENTS, newEvent);
+                    }
+                    else {
+                        try {
+                            await CalendarService.syncCalendar(calendar._id);
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
                 } else if(trigger == 'event.modified') {
                     if(!event.rrule) {
                         await DbService.delete(COLLECTIONS.EVENTS, { teamupEventId: eventId });
@@ -66,7 +86,7 @@ router.post('/event', async (req, res, next) => {
                 }
             }
         }
-
+        
         res.status(200).send('Event received');
     } else {
         res.status(401).send('Invalid signature');

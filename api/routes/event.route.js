@@ -9,6 +9,7 @@ const ResponseError = require('../errors/responseError');
 const { eventPostValidation } = require('../validation/hapi');
 const TeamupService = require('../services/teamup.service');
 const EmailService = require('../services/email.service');
+const PersonalData = require('../db/models/PersonalData.model');
 
 router.post('/', async (req, res, next) => {
     const { error } = eventPostValidation(req.body);
@@ -95,6 +96,14 @@ router.post('/', async (req, res, next) => {
         const location = await DbService.getOne(COLLECTIONS.LOCATIONS, {employees: {"$in": [new mongoose.Types.ObjectId(employee._id), employee._id]}})
         if(location && location.phone) business.phone = location.phone
         await EmailService.sendEmail(business, customerEmail, emailSubject, emailMessage);
+
+        const personalData = new PersonalData({
+            email: req.body.email,
+            phone: req.body.phone,
+            name: req.body.name
+        });
+
+        await DbService.create(COLLECTIONS.PERSONAL_DATA, personalData);
 
         return;
     } catch(err) {

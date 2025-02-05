@@ -222,10 +222,14 @@ export default function Form(params: any) {
     <section className={`${pointerEventsDisabled ? 'pointer-events-none' : ''} inset-0 flex flex-col justify-between p-4`}>
       <div>
         <div className="flex items-center justify-start space-x-4 w-full py-3">
-          <button className="bg-zinc-100 shadow-lg flex items-center rounded border border-zinc-300 p-1" onClick={prev}>
-            <TbChevronLeft size={16} className="text-zinc-500" />
-            <p className="text-xs pr-1">Назад</p>
-          </button>
+          {
+            currentStep != 0
+            ? <button className="bg-zinc-100 shadow-lg flex items-center rounded border border-zinc-300 p-1" onClick={prev}>
+                <TbChevronLeft size={16} className="text-zinc-500" />
+                <p className="text-xs pr-1">Назад</p>
+              </button>
+            : null
+          }
           <span className="text-xl font-semibold text-zinc-800">{steps[currentStep].name}</span>
         </div>
         <Progress value={progress} className="w-[100%]" />
@@ -259,7 +263,7 @@ export default function Form(params: any) {
                     triggerValueReset(0);
                   }}
                   value={location || ''}
-                  className="block w-full rounded border border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-sky-600 focus:border-sky-600 sm:text-sm transition-all ease-in-out"
+                  className="mt-1 block w-full rounded border border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-sky-600 focus:border-sky-600 sm:text-sm transition-all ease-in-out"
                 >
                   {!location ? <option value="">Изберете локация</option> : null}
                   {business.locations.map((location: any) => (
@@ -295,7 +299,7 @@ export default function Form(params: any) {
                     triggerValueReset(0);
                   }}
                   value={employee || ''}
-                  className="block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
+                  className="mt-1 block w-full rounded border border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-sky-600 focus:border-sky-600 sm:text-sm transition-all ease-in-out"
                 >
                   {!employee ? <option value="">Изберете бръснар</option> : null}
                   {location
@@ -356,8 +360,8 @@ export default function Form(params: any) {
                   triggerValueReset(0);
                 }}
                 value={service || ''}
-                className="block w-full rounded border-gray-300 py-1.5 text-gray-900 shadow-sm focus:ring-sky-600 sm:text-sm"
-              >
+                className="mt-1 block w-full rounded border border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-sky-600 focus:border-sky-600 sm:text-sm transition-all ease-in-out"
+                >
                 {!service ? <option value="">Изберете услуга</option> : null}
                 {employee
                 ? business.employees
@@ -544,7 +548,11 @@ export default function Form(params: any) {
 
         {/* Navigation buttons */}
         <div className='mt-6 justify-between'>
-          <p className='text-zinc-700 text-xs'>При записване на час се съгласявате с нашата <a href={`${business.privacyPolicyURL}`} target='_blank' className='text-blue-500'>Политика за поверителност</a></p>
+          {
+            currentStep == steps.length - 1
+            ? <p className='text-zinc-700 text-xs'>При записване на час се съгласявате с нашата <a href={`${business.privacyPolicyURL}`} target='_blank' className='text-blue-500'>Политика за поверителност</a></p>
+            : null
+          }
           {
             currentStep == 1 && (!startDt || !endDt)
             ? null
