@@ -147,7 +147,7 @@ router.get('/available', async (req, res, next) => {
         const serviceDuration = service.timeSlots * business.slotTime;
         const availableTimeSlots = await CalendarService.getAvailableTimeSlotsForService(business._id, serviceDuration, employee.teamupSubCalendarId);
         
-        return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots);
+        return res.status(HTTP_STATUS_CODES.OK).send(availableTimeSlots ?? []);
     } catch(err) {
         return next(new ResponseError("errors.internal_server_error", HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR));
     }

@@ -1,23 +1,6 @@
 const mongoose = require("mongoose");
 const { DATABASE_MODELS } = require("../../global");
 
-// business hours schema assumes that all non isClosed=true days are closed by default
-const businessHoursSchema = new mongoose.Schema({
-    day: {
-      type: String,
-      enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-      required: true,
-    },
-    open: {
-      type: String, // Format: "HH:mm" (24-hour time)
-      required: true,
-    },
-    close: {
-      type: String, // Format: "HH:mm" (24-hour time)
-      required: true,
-    }
-});
-
 const businessSchema = mongoose.Schema({
     name: {
         type: String,
@@ -60,7 +43,6 @@ const businessSchema = mongoose.Schema({
         type: Object,
         required: false
     },
-    workingHours: [businessHoursSchema], 
     URLpostfix: {
         type: String,
         required: true,

@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { BusinessHeader } from '@/components/BusinessHeader';
 import { useToast } from '@/hooks/use-toast';
 import Footer from '@/components/footer';
+import { MdPhone } from 'react-icons/md';
 
 export default function Home() {
 
@@ -51,7 +52,26 @@ export default function Home() {
                             ? <Form business={business} />
                             : <div className='px-4 mt-8'>
                                 <h1 className='text-2xl font-bold'>Деактивирана система</h1>
-                                <p className='mt-3 text-gray-700'>В момента не приемаме нови записвания за часове, тъй като онлайн системата е временно деактивирана. Може да запазите своя час на телефон: <a className='underline text-blue-500' href={`tel:${business.phone}`}>{business.phone}</a></p>
+                                <p className='mt-3 text-gray-700'>В момента не приемаме нови записвания за часове, тъй като онлайн системата е временно деактивирана. Може да запазите своя час на телефон:</p>
+                                {
+                                  business.locations.map((location: any, index: any) => 
+                                      <a key={index} href={`tel:${location.phone}`} className="flex items-center mt-4 p-4 bg-zinc-100 rounded-sm shadow-sm hover:bg-gray-200 transition duration-200">
+                                          {/* Icon */}
+                                          <div className="flex-shrink-0 text-2xl mr-4">
+                                              <MdPhone size={24} />
+                                          </div>
+                                          {/* Text Content */}
+                                          <div>
+                                              <p className="text-lg font-semibold text-gray-800">
+                                              {location.name}
+                                              </p>
+                                              <p className="text-sm text-gray-600">
+                                              {location.phone}
+                                              </p>
+                                          </div>
+                                      </a>
+                                  )
+                                }
                               </div>
                           }
                         </div>

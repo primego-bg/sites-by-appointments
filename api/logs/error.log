@@ -134,3 +134,5 @@
 {"clientIp":"::1","dt":1738416016922,"level":"error","message":"errors.inactive"}
 {"clientIp":"::1","dt":1738416476407,"level":"error","message":"errors.inactive"}
 {"clientIp":"::1","dt":1738416485122,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1739193027938,"level":"error","message":"errors.inactive"}
+{"clientIp":"::ffff:172.20.10.6","dt":1739193031307,"level":"error","message":"errors.inactive"}

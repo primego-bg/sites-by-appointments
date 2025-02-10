@@ -74,6 +74,7 @@ const locationPostValidation = (data) => {
         addressName: Joi.string().min(3).max(100).required(),
         lat: Joi.number().min(-90).max(90).required(),
         lon: Joi.number().min(-180).max(180).required(),
+        workingHours: Joi.array().items(workingHoursSchema).required(),
         businessId: Joi.string().custom((value, helpers) => {
             if (!mongoose.Types.ObjectId.isValid(value)) {
                 return helpers.error('any.invalid');
@@ -176,7 +177,6 @@ const businessPostValidation = (data) => {
             tiktok: Joi.string().uri().optional(),
         }).optional(),
         URLpostfix: Joi.string().pattern(/^[a-zA-Z0-9-_]+$/).required(),
-        workingHours: Joi.array().items(workingHoursSchema).required(),
         slotTime: Joi.number().min(1).max(1440).required(),
         maximumDaysInFuture: Joi.number().min(1).max(60).required(),
         minimumTimeSlotsInFuture: Joi.number().min(1).max(1440).required(),

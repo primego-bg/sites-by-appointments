@@ -40,6 +40,6 @@ app.listen(port, function () {
 
 (async function init() { 
     CalendarService.syncAllCalendars();
-    //console.log(CryptoService.hash("wjpf iimd yduv gnlu"));
+    //console.log(CryptoService.hash(""));
     //EmailService.sendEmail("67901559235c38f677a13c5c", "vencidim04@gmail.com", "Потвърждение на час", "Това е съобщение за потвърждение на час");
 })();
