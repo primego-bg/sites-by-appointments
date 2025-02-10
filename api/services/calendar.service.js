@@ -171,7 +171,7 @@ const CalendarService = {
             
                 // Ensure the business open time respects the minimum cutoff
                 while (moment(businessOpenTime).isBefore(minimumTimeAllowed)) {
-                    businessOpenTime = moment(businessOpenTime).add(businessSlotTime, 'minutes').tz(momentTimezone).toISOString();
+                    businessOpenTime = moment(businessOpenTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
                 }
             
                 // Generate time slots for the current day
@@ -220,7 +220,7 @@ const CalendarService = {
                         });
                     }
             
-                    currentTime = moment(currentTime).add(businessSlotTime, 'minutes').tz(momentTimezone).toISOString();
+                    currentTime = moment(currentTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
                 }
             }            
             return availableTimeSlots;
