@@ -11,8 +11,8 @@ const EmailService = {
                 port: 587,
                 secure: false,
                 auth: {
-                    user: business.senderEmail, //"primego.bg@gmail.com"
-                    pass: decryptedPassword, //"ngmgokzpngcokanu"
+                    user: business.senderEmail,
+                    pass: decryptedPassword, 
                 },
                 tls: {
                     rejectUnauthorized: true,
@@ -24,7 +24,6 @@ const EmailService = {
                 from: business.senderEmail,
                 to: email,
                 subject: subject,
-                //text: message,
                 html: `
                     <div style="
                         font-family: 'Inter', sans-serif; 
