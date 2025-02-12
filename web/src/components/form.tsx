@@ -372,13 +372,13 @@ export default function Form(params: any) {
                     );
                     return (
                     <option key={service._id} value={service._id}>
-                      {service.name}
+                      {service.name} - {service.price}{service.currency}
                     </option>
                     );
                   })
                 : business.services.map((service: any) => (
                   <option key={service._id} value={service._id}>
-                    {service.name}
+                    {service.name} - {service.price}{service.currency}
                   </option>
                   ))}
               </select>
@@ -520,6 +520,9 @@ export default function Form(params: any) {
               <p>
                 <strong>Услуга:</strong> {business.services.find((srv: any) => srv._id === service)?.name}
               </p>
+              <br/>
+              <hr/>
+              <br/>
               <p>
                 <strong>Дата:</strong> {moment(startDt)
         .tz(moment.tz.guess())
@@ -530,6 +533,12 @@ export default function Form(params: any) {
         .tz(moment.tz.guess())
         .format("HH:mm")}
               </p>
+              <p>
+                <strong>Цена:</strong> {business.services.find((srv: any) => srv._id === service)?.price}{business.services.find((srv: any) => srv._id === service)?.currency}
+              </p>
+              <br/>
+              <hr/>
+              <br/>
               <p>
                 <strong>Име:</strong> {name}
               </p>
