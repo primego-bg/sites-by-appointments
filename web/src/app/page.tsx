@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import Footer from '@/components/footer';
 import { MdPhone } from 'react-icons/md';
 
+import './globals.css';
+
 export default function Home() {
 
  const { toast } = useToast();
