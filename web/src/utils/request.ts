@@ -56,6 +56,17 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
     return handleResponse(response);
 }
 
+async function getNotices(employeeId: string) {
+    if (!employeeId) {
+        throw new Error("Invalid employee id");
+    }
+
+    const url = `${rootUrlApi}/notice/${employeeId}`;
+
+    const response = await fetch(url);
+    return handleResponse(response);
+}
+
 async function postEvent(eventData: {
     calendarId: string;
     employeeId: string;
@@ -83,4 +94,4 @@ async function postEvent(eventData: {
     return handleResponse(response);
 }
 
-export { getBusiness, getAvailableTimeSlots, postEvent };
+export { getBusiness, getAvailableTimeSlots, getNotices,postEvent };
