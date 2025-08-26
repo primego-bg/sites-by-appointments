@@ -10,6 +10,10 @@ const serviceSchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    priceEur: {
+        type: String,
+        required: true,
+    },
     currency: {
         type: String,
         required: true

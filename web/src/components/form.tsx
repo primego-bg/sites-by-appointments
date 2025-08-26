@@ -394,13 +394,13 @@ export default function Form(params: any) {
                     );
                     return (
                     <option key={service._id} value={service._id}>
-                      {service.name} - {service.price}{service.currency}
+                      {service.name} - {service.price}{service.currency} ({service.priceEur.toString()} EUR)
                     </option>
                     );
                   })
                 : business.services.map((service: any) => (
                   <option key={service._id} value={service._id}>
-                    {service.name} - {service.price}{service.currency}
+                    {service.name} - {service.price}{service.currency} ({service.priceEur.toString()} EUR)
                   </option>
                   ))}
               </select>
@@ -575,7 +575,7 @@ export default function Form(params: any) {
         .format("HH:mm")}
               </p>
               <p>
-                <strong>Цена:</strong> {business.services.find((srv: any) => srv._id === service)?.price}{business.services.find((srv: any) => srv._id === service)?.currency}
+                <strong>Цена:</strong> {business.services.find((srv: any) => srv._id === service)?.price}{business.services.find((srv: any) => srv._id === service)?.currency} ({business.services.find((srv: any) => srv._id === service)?.priceEur.toString()} EUR)
               </p>
               <br/>
               <hr/>
