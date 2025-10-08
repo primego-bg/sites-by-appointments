@@ -104,7 +104,7 @@ const CalendarService = {
         }
     },
     getAvailableTimeSlotsForService: async (businessId, timeSlotsDuration, teamupSubCalendarId=undefined) => {
-        try {
+        try {            
             const business = await DbService.getById(COLLECTIONS.BUSINESSES, businessId);
             if(!business) return null;
             const businessMaximumDaysInFuture = business.maximumDaysInFuture;
@@ -130,99 +130,120 @@ const CalendarService = {
             const events = !teamupSubCalendarId
                 ? await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id) })
                 : await DbService.getMany(COLLECTIONS.EVENTS, { calendarId: new mongoose.Types.ObjectId(calendar._id), teamupSubCalendarIds: { '$in': [teamupSubCalendarId, parseInt(teamupSubCalendarId, 10)] } });
+            
+
+            // OPTIMIZATION 1: Pre-process events once - convert to timestamps and index by day
+            const eventsByDay = {};
+            if (events && events.length > 0) {
+                for (const event of events) {
+                    const eventStart = moment(event.start).tz(momentTimezone).seconds(0).milliseconds(0);
+                    const eventEnd = moment(event.end).tz(momentTimezone).seconds(0).milliseconds(0);
+                    const startTs = eventStart.valueOf();
+                    const endTs = eventEnd.valueOf();
+                    
+                    // Index event by all days it spans
+                    const daysSpanned = Math.ceil(eventEnd.diff(eventStart, 'days', true)) + 1;
+                    for (let d = 0; d < daysSpanned; d++) {
+                        const dayKey = eventStart.clone().add(d, 'days').format('YYYY-MM-DD');
+                        if (!eventsByDay[dayKey]) eventsByDay[dayKey] = [];
+                        eventsByDay[dayKey].push({ startTs, endTs });
+                    }
+                }
+            }
+
+            // OPTIMIZATION 2: Create working hours lookup map
+            const workingHoursMap = {};
+            for (const wh of workingHours) {
+                if (wh.open !== undefined && wh.close !== undefined) {
+                    workingHoursMap[wh.day] = {
+                        openHour: parseInt(wh.open.split(':')[0]),
+                        openMinute: parseInt(wh.open.split(':')[1]),
+                        closeHour: parseInt(wh.close.split(':')[0]),
+                        closeMinute: parseInt(wh.close.split(':')[1])
+                    };
+                }
+            }
 
             const availableTimeSlots = [];
-            const today = moment().tz(momentTimezone).toISOString();
+            const today = moment().tz(momentTimezone);
+            const minimumTimeAllowedTs = today.clone()
+                .add(businessMinimumTimeSlots * businessSlotTime, 'minutes')
+                .valueOf();
 
             // get all available time slots
             // iterate through each day from today to todayPlusMaxDays
             
             for (let i = 0; i < businessMaximumDaysInFuture; i++) {
-                const currentDate = moment(today).add(i, 'days').tz(momentTimezone).toISOString();
-                const currentDay = moment(currentDate).tz(momentTimezone).format('dddd').toLowerCase();
+                const currentDate = today.clone().add(i, 'days').startOf('day');
+                const currentDay = currentDate.format('dddd').toLowerCase();
+                const dayKey = currentDate.format('YYYY-MM-DD');
             
-                // Calculate the cutoff time for the current date
-                const minimumTimeAllowed = moment(today)
-                    .add(businessMinimumTimeSlots * businessSlotTime, 'minutes') // Add minimum time slots in the future
-                    .tz(momentTimezone).toISOString();
+                // OPTIMIZATION 3: Direct lookup instead of loop
+                const dayHours = workingHoursMap[currentDay];
+                if (!dayHours) continue; // Skip if business is not open this day
+                
+                // Set business hours for the day
+                const businessOpenTime = currentDate.clone().set({
+                    hour: dayHours.openHour,
+                    minute: dayHours.openMinute,
+                    second: 0,
+                    millisecond: 0
+                });
+                
+                const businessCloseTime = currentDate.clone().set({
+                    hour: dayHours.closeHour,
+                    minute: dayHours.closeMinute,
+                    second: 0,
+                    millisecond: 0
+                });
             
-                let isBusinessOpen = false;
-                let businessOpenTime = null;
-                let businessCloseTime = null;
-            
-                for (let j = 0; j < workingHours.length; j++) {
-                    if (workingHours[j].day === currentDay) {
-                        if (workingHours[j].open === undefined || workingHours[j].close === undefined) break;
-                        isBusinessOpen = true;
-                        businessOpenTime = moment(currentDate).set({
-                            hour: parseInt(workingHours[j].open.split(':')[0]),
-                            minute: parseInt(workingHours[j].open.split(':')[1]),
-                        }).tz(momentTimezone).toISOString();
-                        businessCloseTime = moment(currentDate).set({
-                            hour: parseInt(workingHours[j].close.split(':')[0]),
-                            minute: parseInt(workingHours[j].close.split(':')[1]),
-                        }).tz(momentTimezone).toISOString();
-                        break;
-                    }
+                // OPTIMIZATION 4: Calculate slots to skip directly instead of loop
+                let currentTime = businessOpenTime.clone();
+                if (currentTime.valueOf() < minimumTimeAllowedTs) {
+                    const diffMinutes = Math.ceil((minimumTimeAllowedTs - currentTime.valueOf()) / 60000);
+                    const slotsToSkip = Math.ceil(diffMinutes / timeSlotsDuration);
+                    currentTime.add(slotsToSkip * timeSlotsDuration, 'minutes');
                 }
-            
-                // Skip the day if the business is not open
-                if (!isBusinessOpen) continue;
-            
-                // Ensure the business open time respects the minimum cutoff
-                while (moment(businessOpenTime).isBefore(minimumTimeAllowed)) {
-                    businessOpenTime = moment(businessOpenTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
-                }
+                
+                // OPTIMIZATION 5: Get only events for this specific day
+                const dayEvents = eventsByDay[dayKey] || [];
+                const businessCloseTs = businessCloseTime.valueOf();
             
                 // Generate time slots for the current day
-                let currentTime = moment(businessOpenTime).toISOString();
-                while (moment(currentTime).isBefore(businessCloseTime)) {
-                    const endTime = moment(currentTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
-                    if (moment(endTime).isAfter(businessCloseTime)) break;
+                while (currentTime.valueOf() < businessCloseTs) {
+                    const endTime = currentTime.clone().add(timeSlotsDuration, 'minutes');
+                    const endTimeTs = endTime.valueOf();
+                    
+                    if (endTimeTs > businessCloseTs) break;
+                    
+                    const currentTimeTs = currentTime.valueOf();
             
+                    // OPTIMIZATION 6: Check only relevant day events with simplified timestamp comparison
                     let isTimeSlotAvailable = true;
-                    if (events) {
-                        for (let j = 0; j < events.length; j++) {
-                            const event = events[j];
-                            const eventStartDt = moment(event.start).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
-                            const eventEndDt = moment(event.end).tz(momentTimezone).seconds(0).milliseconds(0).toISOString();
-            
-                            if (
-                                !(
-                                    moment(currentTime).isSame(eventEndDt, 'minute') || 
-                                    moment(endTime).isSame(eventStartDt, 'minute')
-                                ) &&
-                                moment(currentTime).isBefore(eventEndDt) && 
-                                moment(endTime).isAfter(eventStartDt)
-                            ) {
+                    for (const event of dayEvents) {
+                        // Slots are adjacent (touching) if slot_end == event_start OR slot_start == event_end
+                        const touching = (endTimeTs === event.startTs) || (currentTimeTs === event.endTs);
+                        
+                        if (!touching) {
+                            // Check for overlap: slot starts before event ends AND slot ends after event starts
+                            if (currentTimeTs < event.endTs && endTimeTs > event.startTs) {
                                 isTimeSlotAvailable = false;
                                 break;
-                            }
-
-                            if (
-                                !(moment(currentTime).isSame(eventEndDt, 'minute') || moment(endTime).isSame(eventStartDt, 'minute'))
-                            ) {
-                                if (
-                                    moment(currentTime).isBetween(eventStartDt, eventEndDt, null, '[)') ||
-                                    moment(endTime).isBetween(eventStartDt, eventEndDt, null, '(]')
-                                ) {
-                                    isTimeSlotAvailable = false;
-                                    break;
-                                }
                             }
                         }
                     }
             
                     if (isTimeSlotAvailable) {
                         availableTimeSlots.push({
-                            start: moment(currentTime).seconds(0).milliseconds(0).toISOString(),
-                            end: moment(endTime).seconds(0).milliseconds(0).toISOString(),
+                            start: currentTime.toISOString(),
+                            end: endTime.toISOString(),
                         });
                     }
             
-                    currentTime = moment(currentTime).add(timeSlotsDuration, 'minutes').tz(momentTimezone).toISOString();
+                    currentTime.add(timeSlotsDuration, 'minutes');
                 }
-            }            
+            }
+            
             return availableTimeSlots;
         } catch (error) {
             console.error(error);
