@@ -151,16 +151,42 @@ const CalendarService = {
                 }
             }
 
-            // OPTIMIZATION 2: Create working hours lookup map
+            // OPTIMIZATION 2: Create working hours lookup map (supports multiple time ranges per day)
             const workingHoursMap = {};
             for (const wh of workingHours) {
                 if (wh.open !== undefined && wh.close !== undefined) {
-                    workingHoursMap[wh.day] = {
+                    if (!workingHoursMap[wh.day]) {
+                        workingHoursMap[wh.day] = [];
+                    }
+                    workingHoursMap[wh.day].push({
                         openHour: parseInt(wh.open.split(':')[0]),
                         openMinute: parseInt(wh.open.split(':')[1]),
                         closeHour: parseInt(wh.close.split(':')[0]),
                         closeMinute: parseInt(wh.close.split(':')[1])
-                    };
+                    });
+                }
+            }
+
+            // Sort time ranges for each day chronologically and validate no overlaps
+            for (const day in workingHoursMap) {
+                workingHoursMap[day].sort((a, b) => {
+                    const aMinutes = a.openHour * 60 + a.openMinute;
+                    const bMinutes = b.openHour * 60 + b.openMinute;
+                    return aMinutes - bMinutes;
+                });
+
+                // Validate that time ranges don't overlap
+                for (let i = 0; i < workingHoursMap[day].length - 1; i++) {
+                    const currentRange = workingHoursMap[day][i];
+                    const nextRange = workingHoursMap[day][i + 1];
+                    
+                    const currentCloseMinutes = currentRange.closeHour * 60 + currentRange.closeMinute;
+                    const nextOpenMinutes = nextRange.openHour * 60 + nextRange.openMinute;
+                    
+                    // Ensure current range closes before or at the same time next range opens
+                    if (currentCloseMinutes > nextOpenMinutes) {
+                        console.error(`Overlapping working hours detected for ${day}: ${currentRange.openHour}:${currentRange.openMinute}-${currentRange.closeHour}:${currentRange.closeMinute} overlaps with ${nextRange.openHour}:${nextRange.openMinute}-${nextRange.closeHour}:${nextRange.closeMinute}`);
+                    }
                 }
             }
 
@@ -179,68 +205,72 @@ const CalendarService = {
                 const dayKey = currentDate.format('YYYY-MM-DD');
             
                 // OPTIMIZATION 3: Direct lookup instead of loop
-                const dayHours = workingHoursMap[currentDay];
-                if (!dayHours) continue; // Skip if business is not open this day
-                
-                // Set business hours for the day
-                const businessOpenTime = currentDate.clone().set({
-                    hour: dayHours.openHour,
-                    minute: dayHours.openMinute,
-                    second: 0,
-                    millisecond: 0
-                });
-                
-                const businessCloseTime = currentDate.clone().set({
-                    hour: dayHours.closeHour,
-                    minute: dayHours.closeMinute,
-                    second: 0,
-                    millisecond: 0
-                });
-            
-                // OPTIMIZATION 4: Calculate slots to skip directly instead of loop
-                let currentTime = businessOpenTime.clone();
-                if (currentTime.valueOf() < minimumTimeAllowedTs) {
-                    const diffMinutes = Math.ceil((minimumTimeAllowedTs - currentTime.valueOf()) / 60000);
-                    const slotsToSkip = Math.ceil(diffMinutes / timeSlotsDuration);
-                    currentTime.add(slotsToSkip * timeSlotsDuration, 'minutes');
-                }
+                const dayHoursArray = workingHoursMap[currentDay];
+                if (!dayHoursArray || dayHoursArray.length === 0) continue; // Skip if business is not open this day
                 
                 // OPTIMIZATION 5: Get only events for this specific day
                 const dayEvents = eventsByDay[dayKey] || [];
-                const businessCloseTs = businessCloseTime.valueOf();
-            
-                // Generate time slots for the current day
-                while (currentTime.valueOf() < businessCloseTs) {
-                    const endTime = currentTime.clone().add(timeSlotsDuration, 'minutes');
-                    const endTimeTs = endTime.valueOf();
+
+                // Iterate through each time range for the day (e.g., morning and afternoon for lunch break)
+                for (const dayHours of dayHoursArray) {
+                    // Set business hours for this time range
+                    const businessOpenTime = currentDate.clone().set({
+                        hour: dayHours.openHour,
+                        minute: dayHours.openMinute,
+                        second: 0,
+                        millisecond: 0
+                    });
                     
-                    if (endTimeTs > businessCloseTs) break;
+                    const businessCloseTime = currentDate.clone().set({
+                        hour: dayHours.closeHour,
+                        minute: dayHours.closeMinute,
+                        second: 0,
+                        millisecond: 0
+                    });
+                
+                    // OPTIMIZATION 4: Calculate slots to skip directly instead of loop
+                    let currentTime = businessOpenTime.clone();
+                    if (currentTime.valueOf() < minimumTimeAllowedTs) {
+                        const diffMinutes = Math.ceil((minimumTimeAllowedTs - currentTime.valueOf()) / 60000);
+                        const slotsToSkip = Math.ceil(diffMinutes / timeSlotsDuration);
+                        currentTime.add(slotsToSkip * timeSlotsDuration, 'minutes');
+                    }
                     
-                    const currentTimeTs = currentTime.valueOf();
-            
-                    // OPTIMIZATION 6: Check only relevant day events with simplified timestamp comparison
-                    let isTimeSlotAvailable = true;
-                    for (const event of dayEvents) {
-                        // Slots are adjacent (touching) if slot_end == event_start OR slot_start == event_end
-                        const touching = (endTimeTs === event.startTs) || (currentTimeTs === event.endTs);
+                    const businessCloseTs = businessCloseTime.valueOf();
+                
+                    // Generate time slots for the current time range
+                    while (currentTime.valueOf() < businessCloseTs) {
+                        const endTime = currentTime.clone().add(timeSlotsDuration, 'minutes');
+                        const endTimeTs = endTime.valueOf();
                         
-                        if (!touching) {
-                            // Check for overlap: slot starts before event ends AND slot ends after event starts
-                            if (currentTimeTs < event.endTs && endTimeTs > event.startTs) {
-                                isTimeSlotAvailable = false;
-                                break;
+                        if (endTimeTs > businessCloseTs) break;
+                        
+                        const currentTimeTs = currentTime.valueOf();
+                
+                        // OPTIMIZATION 6: Check only relevant day events with simplified timestamp comparison
+                        let isTimeSlotAvailable = true;
+                        for (const event of dayEvents) {
+                            // Slots are adjacent (touching) if slot_end == event_start OR slot_start == event_end
+                            const touching = (endTimeTs === event.startTs) || (currentTimeTs === event.endTs);
+                            
+                            if (!touching) {
+                                // Check for overlap: slot starts before event ends AND slot ends after event starts
+                                if (currentTimeTs < event.endTs && endTimeTs > event.startTs) {
+                                    isTimeSlotAvailable = false;
+                                    break;
+                                }
                             }
                         }
+                
+                        if (isTimeSlotAvailable) {
+                            availableTimeSlots.push({
+                                start: currentTime.toISOString(),
+                                end: endTime.toISOString(),
+                            });
+                        }
+                
+                        currentTime.add(timeSlotsDuration, 'minutes');
                     }
-            
-                    if (isTimeSlotAvailable) {
-                        availableTimeSlots.push({
-                            start: currentTime.toISOString(),
-                            end: endTime.toISOString(),
-                        });
-                    }
-            
-                    currentTime.add(timeSlotsDuration, 'minutes');
                 }
             }
             
