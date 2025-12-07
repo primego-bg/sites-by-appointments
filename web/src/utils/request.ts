@@ -36,10 +36,7 @@ async function getBusiness(topLevelDomain: string) {
         throw new Error("Invalid top-level domain");
     }
 
-    const url =
-        process.env.ENVIRONMENT === "production"
-            ? `${rootUrlApi}/business/${topLevelDomain}`
-            : `${rootUrlApi}/business/kerelski.com`;
+    const url = `${rootUrlApi}/business/kerelski.com`;
 
     const response = await fetch(url);
     return handleResponse(response);
