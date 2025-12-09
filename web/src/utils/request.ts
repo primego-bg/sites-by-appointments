@@ -1,6 +1,9 @@
 const rootUrlApi = "https://api.appointments.sitezup.com";
 // http://172.20.10.6:2451
 
+// Cache buster - change this value to force all clients to bypass cache
+const CACHE_VERSION = "v2";
+
 const errorMessages: { [key: string]: string } = {
     "errors.inactive": "Resource not available",
     "errors.not_found": "Resource not found",
@@ -36,9 +39,13 @@ async function getBusiness(topLevelDomain: string) {
         throw new Error("Invalid top-level domain");
     }
 
-    const url = `${rootUrlApi}/business/kerelski.com`;
+    const url = `${rootUrlApi}/business/kerelski.com?_cb=${CACHE_VERSION}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {
+            'Cache-Control': 'no-store',
+        },
+    });
     return handleResponse(response);
 }
 
@@ -47,9 +54,13 @@ async function getAvailableTimeSlots(calendarId: string, employeeId: string, ser
         throw new Error("Invalid input fields");
     }
 
-    const url = `${rootUrlApi}/event/available?calendarId=${calendarId}&employeeId=${employeeId}&serviceId=${serviceId}`;
+    const url = `${rootUrlApi}/event/available?calendarId=${calendarId}&employeeId=${employeeId}&serviceId=${serviceId}&_cb=${CACHE_VERSION}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {
+            'Cache-Control': 'no-store',
+        },
+    });
     return handleResponse(response);
 }
 
@@ -58,9 +69,13 @@ async function getNotices(employeeId: string) {
         throw new Error("Invalid employee id");
     }
 
-    const url = `${rootUrlApi}/notice/${employeeId}`;
+    const url = `${rootUrlApi}/notice/${employeeId}?_cb=${CACHE_VERSION}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {
+            'Cache-Control': 'no-store',
+        },
+    });
     return handleResponse(response);
 }
 
@@ -78,12 +93,13 @@ async function postEvent(eventData: {
         throw new Error("Invalid event data");
     }
 
-    const url = `${rootUrlApi}/event`;
+    const url = `${rootUrlApi}/event?_cb=${CACHE_VERSION}`;
 
     const response = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            'Cache-Control': 'no-store',
         },
         body: JSON.stringify(eventData),
     });
